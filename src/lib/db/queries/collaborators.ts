@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { Collections, mapDocs } from "../collections";
 import type { Collaborator, DocumentType, StoredDocument } from "../types";
 import { todayISO } from "@/lib/domain/dates";
@@ -10,17 +11,25 @@ export async function listCollaborators(opts?: { status?: Collaborator["status"]
   return mapDocs(snap).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 }
 
+const allJobRoles = cache(async () => mapDocs(await Collections.jobRoles().get()));
+const allDocumentTypes = cache(async () => mapDocs(await Collections.documentTypes().get()));
+const allDocuments = cache(async () => mapDocs(await Collections.documents().get()));
+
 export async function listJobRoles(activeOnly = true) {
-  const snap = await Collections.jobRoles().get();
-  return mapDocs(snap).filter((r) => !activeOnly || r.active).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+  return (await allJobRoles()).filter((r) => !activeOnly || r.active).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 }
 
 export async function listDocumentTypes(appliesTo?: DocumentType["appliesTo"], activeOnly = true) {
-  const snap = await Collections.documentTypes().get();
-  return mapDocs(snap)
+  return (await allDocumentTypes())
     .filter((t) => (!appliesTo || t.appliesTo === appliesTo) && (!activeOnly || t.active))
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 }
+
+/** Colaborador por id, deduplicado na requisição (layout + página). */
+export const getCollaborator = cache(async (id: string): Promise<Collaborator | null> => {
+  const snap = await Collections.collaborators().doc(id).get();
+  return snap.exists ? { ...(snap.data() as Collaborator), id: snap.id } : null;
+});
 
 export async function listDocuments(ownerType: StoredDocument["ownerType"], ownerId: string) {
   const snap = await Collections.documents().where("ownerType", "==", ownerType).where("ownerId", "==", ownerId).get();
@@ -45,11 +54,11 @@ export function documentStatus(types: DocumentType[], docs: StoredDocument[], to
   return { missing, expired, expiringSoon };
 }
 
-/** Pendências documentais de todos os donos de um tipo (para dashboard). */
+/** Pendências documentais de todos os donos de um tipo (uma consulta de tipos e uma de documentos por requisição). */
 export async function pendingDocumentsCount(ownerType: StoredDocument["ownerType"], ownerIds: string[]): Promise<{ ownerId: string; missing: number; expired: number }[]> {
   if (ownerIds.length === 0) return [];
-  const [types, snap] = await Promise.all([listDocumentTypes(ownerType), Collections.documents().where("ownerType", "==", ownerType).get()]);
-  const docs = mapDocs(snap);
+  const [types, all] = await Promise.all([listDocumentTypes(ownerType), allDocuments()]);
+  const docs = all.filter((d) => d.ownerType === ownerType);
   const today = todayISO();
   return ownerIds
     .map((ownerId) => {

@@ -19,7 +19,7 @@ export default async function GuardiansPage() {
           <ul className="divide-y divide-border">
             {guardians.map((g) => (
               <li key={g.id}>
-                <Link href={`/responsaveis/${g.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-surface-50">
+                <Link prefetch={false} href={`/responsaveis/${g.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-surface-50">
                   <Avatar name={g.name} />
                   <div className="min-w-0 flex-1">
                     <p className="font-medium truncate">{g.name} <span className="text-ink-500 font-normal">· {g.relationship}</span></p>

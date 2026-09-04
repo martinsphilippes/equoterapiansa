@@ -21,7 +21,7 @@ export function NavLinks({ items, orientation }: { items: NavItem[]; orientation
           const active = isActive(it.href);
           return (
             <li key={it.href}>
-              <Link href={it.href as never} className={`relative flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-semibold ${active ? "text-primary-700" : "text-ink-500"}`}>
+              <Link prefetch={false} href={it.href as never} className={`relative flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-semibold ${active ? "text-primary-700" : "text-ink-500"}`}>
                 <span className={`flex items-center justify-center h-7 w-12 rounded-full transition ${active ? "bg-primary-soft" : ""}`}>
                   <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.9} />
                 </span>
@@ -40,7 +40,7 @@ export function NavLinks({ items, orientation }: { items: NavItem[]; orientation
         const active = isActive(it.href);
         return (
           <li key={it.href}>
-            <Link href={it.href as never} className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${active ? "bg-primary-soft text-primary-700" : "text-ink-700 hover:bg-surface-100"}`}>
+            <Link prefetch={false} href={it.href as never} className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${active ? "bg-primary-soft text-primary-700" : "text-ink-700 hover:bg-surface-100"}`}>
               {active && <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-primary" />}
               <Icon className="h-5 w-5" strokeWidth={active ? 2.3 : 1.9} />
               {it.label}

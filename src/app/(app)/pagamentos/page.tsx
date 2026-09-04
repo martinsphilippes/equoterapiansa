@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requirePermission } from "@/lib/auth/session";
 import { getSettings } from "@/lib/db/settings";
 import { listCollaborators } from "@/lib/db/queries/collaborators";
-import { buildPayrollMonth } from "@/lib/db/queries/payroll";
+import { buildPayrollMonths } from "@/lib/db/queries/payroll";
 import { Badge, Card, PageHeader, Stat, Table, thCls, tdCls, EmptyState } from "@/components/ui";
 import { MonthNav } from "@/components/time/MonthNav";
 import { currentCompetence, minutesToHM } from "@/lib/domain/dates";
@@ -18,7 +18,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
   const sp = await searchParams;
   const competence = sp1(sp, "mes") ?? currentCompetence(settings.timezone);
   const collaborators = (await listCollaborators({ status: "all" })).filter((c) => c.status !== "terminated" || (c.terminationDate ?? "9999") >= `${competence}-01`);
-  const months = (await Promise.all(collaborators.map((c) => buildPayrollMonth(c.id, competence)))).filter((m): m is NonNullable<typeof m> => !!m);
+  const months = await buildPayrollMonths(collaborators, competence);
   const unpaid = months.filter((m) => m.status === "unpaid");
   const totalCalc = months.reduce((a, m) => a + m.calculatedAmount, 0);
   const totalPaid = months.filter((m) => m.status === "paid").reduce((a, m) => a + (m.paidAmount ?? 0), 0);
@@ -40,7 +40,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
             <tbody>
               {months.map((m) => (
                 <tr key={m.id}>
-                  <td className={tdCls}><Link href={`/pagamentos/${m.collaboratorId}/${competence}`} className="font-medium text-primary-800 hover:underline">{m.collaboratorName}</Link><span className="block text-xs text-ink-500">{m.payType === "hourly" ? "por hora" : "mensal"}</span></td>
+                  <td className={tdCls}><Link prefetch={false} href={`/pagamentos/${m.collaboratorId}/${competence}`} className="font-medium text-primary-800 hover:underline">{m.collaboratorName}</Link><span className="block text-xs text-ink-500">{m.payType === "hourly" ? "por hora" : "mensal"}</span></td>
                   <td className={tdCls}>{minutesToHM(m.workedMinutes)} <span className="text-xs text-ink-500">/ {minutesToHM(m.expectedMinutes)}</span></td>
                   <td className={tdCls}>{m.absences}</td>
                   <td className={tdCls}>{formatBRL(m.calculatedAmount)}</td>

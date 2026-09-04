@@ -1,4 +1,4 @@
-import { BrandLoader } from "@/components/brand/Brand";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 export default function Loading() {
-  return <BrandLoader />;
+  return <PageSkeleton cards={1} />;
 }

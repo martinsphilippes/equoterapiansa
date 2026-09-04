@@ -17,7 +17,7 @@ export default async function PayrollMonthPage({ params }: { params: Params<{ co
   if (!m) notFound();
   return (
     <div className="space-y-5">
-      <PageHeader back="/pagamentos" title={`${m.collaboratorName} — ${competenceLabel(competence).toUpperCase()}`} subtitle={<Link href={`/colaboradores/${collaboratorId}/jornada?mes=${competence}`} className="text-primary-700 hover:underline">Ver registros de jornada do mês</Link>} />
+      <PageHeader back="/pagamentos" title={`${m.collaboratorName} — ${competenceLabel(competence).toUpperCase()}`} subtitle={<Link prefetch={false} href={`/colaboradores/${collaboratorId}/jornada?mes=${competence}`} className="text-primary-700 hover:underline">Ver registros de jornada do mês</Link>} />
       <MonthNavCompetence collaboratorId={collaboratorId} competence={competence} />
       <PayrollSheet m={m} canManage={hasPermission(user, "payments.manage")} today={todayISO(settings.timezone)} />
       <Card title="Histórico de pagamentos">
@@ -25,7 +25,7 @@ export default async function PayrollMonthPage({ params }: { params: Params<{ co
           <ul className="divide-y divide-border">
             {history.map((h) => (
               <li key={h.id} className="flex items-center justify-between py-2 text-sm">
-                <Link href={`/pagamentos/${collaboratorId}/${h.competence}`} className="font-medium hover:underline">{competenceLabel(h.competence)}</Link>
+                <Link prefetch={false} href={`/pagamentos/${collaboratorId}/${h.competence}`} className="font-medium hover:underline">{competenceLabel(h.competence)}</Link>
                 <span className="flex items-center gap-3">
                   <span>{h.status === "paid" ? formatBRL(h.paidAmount) : formatBRL(h.calculatedAmount)}</span>
                   {h.status === "paid" ? <Badge tone="green">Pago</Badge> : <Badge tone="amber">Não pago</Badge>}
@@ -47,9 +47,9 @@ import { addMonths } from "@/lib/domain/dates";
 function MonthNavLinks({ collaboratorId, competence }: { collaboratorId: string; competence: string }) {
   return (
     <div className="flex items-center justify-between gap-2 rounded-xl bg-surface border border-border px-2 py-1.5 no-print">
-      <Link href={`/pagamentos/${collaboratorId}/${addMonths(competence, -1)}`} className="px-3 py-1 rounded-lg hover:bg-surface-100">‹</Link>
+      <Link prefetch={false} href={`/pagamentos/${collaboratorId}/${addMonths(competence, -1)}`} className="px-3 py-1 rounded-lg hover:bg-surface-100">‹</Link>
       <span className="font-medium">{competenceLabel(competence)}</span>
-      <Link href={`/pagamentos/${collaboratorId}/${addMonths(competence, 1)}`} className="px-3 py-1 rounded-lg hover:bg-surface-100">›</Link>
+      <Link prefetch={false} href={`/pagamentos/${collaboratorId}/${addMonths(competence, 1)}`} className="px-3 py-1 rounded-lg hover:bg-surface-100">›</Link>
     </div>
   );
 }

@@ -29,14 +29,14 @@ export function AppShell({ user, children, nav, homeHref = "/painel" }: { user: 
     <div className="flex-1 flex min-h-dvh">
       {/* Sidebar (desktop): logo completa, navegação e usuário */}
       <aside className="hidden md:flex w-[268px] shrink-0 flex-col border-r border-border bg-surface no-print">
-        <Link href={homeHref as never} className="flex items-center justify-center px-6 pt-6 pb-4">
-          <BrandLogo className="w-44" priority />
+        <Link prefetch={false} href={homeHref as never} className="flex items-center justify-center px-6 pt-6 pb-4">
+          <BrandLogo className="w-44" sizes="176px" />
         </Link>
         <div className="flex-1 overflow-y-auto py-2">
           <NavLinks items={nav} orientation="vertical" />
         </div>
         <div className="border-t border-border p-4">
-          <Link href="/conta" className="flex items-center gap-3 hover:bg-surface-100 rounded-xl p-2 -m-2">
+          <Link prefetch={false} href="/conta" className="flex items-center gap-3 hover:bg-surface-100 rounded-xl p-2 -m-2">
             <Avatar name={user.name} size="sm" />
             <div className="min-w-0">
               <p className="text-sm font-semibold truncate">{user.name}</p>
@@ -50,8 +50,8 @@ export function AppShell({ user, children, nav, homeHref = "/painel" }: { user: 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header (mobile): símbolo + nome, avatar */}
         <header className="md:hidden sticky top-0 z-20 h-14 flex items-center justify-between px-4 bg-surface/90 backdrop-blur border-b border-border no-print pt-[env(safe-area-inset-top)]">
-          <Link href={homeHref as never} className="min-w-0"><BrandLockup compact /></Link>
-          <Link href="/conta" aria-label="Minha conta"><Avatar name={user.name} size="sm" /></Link>
+          <Link prefetch={false} href={homeHref as never} className="min-w-0"><BrandLockup compact /></Link>
+          <Link prefetch={false} href="/conta" aria-label="Minha conta"><Avatar name={user.name} size="sm" /></Link>
         </header>
         <main className="flex-1 px-4 py-5 md:px-8 md:py-7 pb-24 md:pb-8 max-w-6xl w-full mx-auto">{children}</main>
         <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-surface border-t border-border no-print pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-16px_rgba(10,14,110,0.25)]">

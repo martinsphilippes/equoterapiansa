@@ -1,5 +1,5 @@
 import { requirePermission, hasPermission } from "@/lib/auth/session";
-import { Collections, getDoc } from "@/lib/db/collections";
+import { getCollaborator } from "@/lib/db/queries/collaborators";
 import { getSettings } from "@/lib/db/settings";
 import { Card, DescriptionList, Field, Input, Select } from "@/components/ui";
 import { ActionForm } from "@/components/ui/ActionForm";
@@ -16,7 +16,7 @@ const WD = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 export default async function CollaboratorDataPage({ params }: { params: Params<{ id: string }> }) {
   const user = await requirePermission(["collaborators.view", "collaborators.manage"]);
   const { id } = await params;
-  const [c, settings] = await Promise.all([getDoc(Collections.collaborators(), id), getSettings()]);
+  const [c, settings] = await Promise.all([getCollaborator(id), getSettings()]);
   if (!c) notFound();
   const schedule = scheduleFor(settings, c.schedule);
   const finance = hasPermission(user, "finance.view");

@@ -18,7 +18,7 @@ export default async function CollaboratorPaymentsPage({ params }: { params: Par
         <ul className="divide-y divide-border">
           {history.map((h) => (
             <li key={h.id} className="flex items-center justify-between py-2.5 text-sm">
-              <Link href={`/pagamentos/${id}/${h.competence}`} className="font-medium hover:underline">{competenceLabel(h.competence)}</Link>
+              <Link prefetch={false} href={`/pagamentos/${id}/${h.competence}`} className="font-medium hover:underline">{competenceLabel(h.competence)}</Link>
               <span className="flex items-center gap-3">
                 <span>{formatBRL(h.status === "paid" ? h.paidAmount : h.calculatedAmount)}</span>
                 {h.status === "paid" ? <Badge tone="green">Pago</Badge> : <Badge tone="amber">Não pago</Badge>}

@@ -4,16 +4,18 @@ import { cn } from "@/components/ui";
 /**
  * Componentes de marca. Os arquivos em /public/brand são recortes da logomarca
  * oficial (sem alteração do desenho). "white" para fundos azuis, "blue" para claros.
+ * `sizes` informa a largura real de exibição para que o otimizador sirva a menor
+ * imagem possível (o padrão do next/image usaria a largura intrínseca de ~1000 px).
  */
-export function BrandSymbol({ tone = "blue", className, priority }: { tone?: "blue" | "white"; className?: string; priority?: boolean }) {
+export function BrandSymbol({ tone = "blue", className, priority, sizes = "64px" }: { tone?: "blue" | "white"; className?: string; priority?: boolean; sizes?: string }) {
   return (
-    <Image src={`/brand/symbol-${tone}.png`} alt="" width={988} height={518} priority={priority} className={cn("h-8 w-auto select-none", className)} draggable={false} />
+    <Image src={`/brand/symbol-${tone}.png`} alt="" width={988} height={518} sizes={sizes} priority={priority} className={cn("h-8 w-auto select-none", className)} draggable={false} />
   );
 }
 
-export function BrandLogo({ tone = "blue", className, priority }: { tone?: "blue" | "white"; className?: string; priority?: boolean }) {
+export function BrandLogo({ tone = "blue", className, priority, sizes = "176px" }: { tone?: "blue" | "white"; className?: string; priority?: boolean; sizes?: string }) {
   return (
-    <Image src={`/brand/logo-${tone}.png`} alt="Equoterapia Nossa Senhora Aparecida" width={1291} height={866} priority={priority} className={cn("w-40 h-auto select-none", className)} draggable={false} />
+    <Image src={`/brand/logo-${tone}.png`} alt="Equoterapia Nossa Senhora Aparecida" width={1291} height={866} sizes={sizes} priority={priority} className={cn("w-40 h-auto select-none", className)} draggable={false} />
   );
 }
 
@@ -23,7 +25,7 @@ export function BrandLockup({ tone = "blue", className, compact }: { tone?: "blu
   const sub = tone === "white" ? "text-white/70" : "text-ink-500";
   return (
     <span className={cn("inline-flex items-center gap-2.5 min-w-0", className)}>
-      <BrandSymbol tone={tone} className={compact ? "h-7" : "h-9"} />
+      <BrandSymbol tone={tone} className={compact ? "h-7" : "h-9"} sizes="72px" priority />
       <span className="min-w-0 leading-tight">
         <span className={cn("block font-extrabold tracking-tight truncate", text, compact ? "text-[15px]" : "text-base")}>Equoterapia</span>
         {!compact && <span className={cn("block text-[10px] uppercase tracking-[0.18em] truncate", sub)}>Nossa Senhora Aparecida</span>}
@@ -35,7 +37,7 @@ export function BrandLockup({ tone = "blue", className, compact }: { tone?: "blu
 export function BrandLoader({ label = "Carregando…" }: { label?: string }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center py-24 text-ink-500">
-      <BrandSymbol className="h-12 animate-brand-pulse" />
+      <BrandSymbol className="h-12 animate-brand-pulse" sizes="96px" />
       <p className="mt-4 text-sm">{label}</p>
     </div>
   );

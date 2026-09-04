@@ -32,7 +32,7 @@ export function LinkButton({
   href, variant = "primary", size = "md", className, children,
 }: { href: string; variant?: Variant; size?: keyof typeof sizes; className?: string; children: ReactNode }) {
   return (
-    <Link href={href as never} className={cn("inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition", variants[variant], sizes[size], className)}>
+    <Link prefetch={false} href={href as never} className={cn("inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition", variants[variant], sizes[size], className)}>
       {children}
     </Link>
   );
@@ -54,10 +54,10 @@ export function Card({ children, className, title, action }: { children: ReactNo
 
 export function PageHeader({ title, subtitle, back, actions }: { title: ReactNode; subtitle?: ReactNode; back?: string; actions?: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 mb-5 animate-rise">
+    <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
       <div className="min-w-0">
         {back && (
-          <Link href={back as never} className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-800 mb-1">← Voltar</Link>
+          <Link prefetch={false} href={back as never} className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-800 mb-1">← Voltar</Link>
         )}
         <h1 className="text-2xl font-extrabold tracking-tight text-ink-900 truncate">{title}</h1>
         {subtitle && <p className="text-sm text-ink-500 mt-0.5">{subtitle}</p>}
@@ -110,7 +110,7 @@ export function Checkbox({ label, className, ...rest }: InputHTMLAttributes<HTML
 export function EmptyState({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return (
     <div className="text-center py-10 px-4">
-      <div className="mx-auto mb-3 h-12 w-16 opacity-25 bg-[url('/brand/symbol-blue.png')] bg-contain bg-no-repeat bg-center" aria-hidden />
+      <div className="mx-auto mb-3 h-12 w-16 opacity-25 bg-[url('/brand/symbol-blue-320.png')] bg-contain bg-no-repeat bg-center" aria-hidden />
       <p className="font-semibold text-ink-900">{title}</p>
       {description && <p className="text-sm text-ink-500 mt-1 max-w-sm mx-auto">{description}</p>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}
@@ -154,7 +154,7 @@ export function Tabs({ tabs, current }: { tabs: { href: string; label: string }[
       {tabs.map((t) => {
         const active = current === t.href;
         return (
-          <Link key={t.href} href={t.href as never}
+          <Link prefetch={false} key={t.href} href={t.href as never}
             className={cn("whitespace-nowrap px-3 py-2 text-sm font-semibold rounded-t-lg border-b-2 -mb-px transition", active ? "border-primary text-primary-700" : "border-transparent text-ink-500 hover:text-ink-900")}>
             {t.label}
           </Link>

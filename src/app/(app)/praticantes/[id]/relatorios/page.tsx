@@ -29,7 +29,7 @@ export default async function ReportsPage({ params }: { params: Params<{ id: str
               {reports.map((r) => (
                 <li key={r.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <Link href={`/praticantes/${id}/relatorios/${r.id}`} className="font-medium hover:underline">{r.title}</Link>
+                    <Link prefetch={false} href={`/praticantes/${id}/relatorios/${r.id}`} className="font-medium hover:underline">{r.title}</Link>
                     <p className="text-sm text-ink-500">{isoToBR(r.periodStart)} a {isoToBR(r.periodEnd)} · {r.professionalName}</p>
                   </div>
                   <div className="flex items-center gap-2">

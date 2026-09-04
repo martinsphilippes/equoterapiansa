@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { appointmentsOfPractitioner, assessmentsOfPractitioner } from "./practitioners";
 import { computeFrequency } from "@/lib/domain/frequency";
 import { compareAssessments } from "@/lib/domain/assessments";
@@ -6,7 +7,7 @@ import { addMonths } from "@/lib/domain/dates";
 import type { Practitioner, Settings } from "../types";
 import { ageFrom } from "@/lib/domain/dates";
 
-export async function practitionerStats(p: Practitioner, settings: Settings) {
+export const practitionerStats = cache(async (p: Practitioner, settings: Settings) => {
   const [appointments, assessments] = await Promise.all([appointmentsOfPractitioner(p.id), assessmentsOfPractitioner(p.id)]);
   const freq = computeFrequency(appointments);
   const initial = assessments.find((a) => a.type === "initial") ?? assessments[0] ?? null;
@@ -24,4 +25,4 @@ export async function practitionerStats(p: Practitioner, settings: Settings) {
       evolutionDelta: cmp.overall.delta,
     },
   };
-}
+});

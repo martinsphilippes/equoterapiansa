@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { db } from "@/lib/firebase/admin";
 import type { Settings } from "./types";
 import { DEFAULT_SCHEDULE } from "@/lib/domain/time";
@@ -26,11 +27,12 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export const settingsRef = () => db.collection("settings").doc("general");
 
-export async function getSettings(): Promise<Settings> {
+/** Lidas uma única vez por requisição (layout, página e actions compartilham). */
+export const getSettings = cache(async (): Promise<Settings> => {
   const snap = await settingsRef().get();
   if (!snap.exists) return DEFAULT_SETTINGS;
   return { ...DEFAULT_SETTINGS, ...(snap.data() as Partial<Settings>) };
-}
+});
 
 export const DEFAULT_JOB_ROLES = [
   { name: "Auxiliar guia", isProfessional: false },

@@ -11,10 +11,10 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
       <section className="relative overflow-hidden brand-gradient text-white md:w-[46%] md:min-h-dvh flex flex-col">
         <div className="absolute inset-0 brand-glow" aria-hidden />
         <div className="absolute -right-16 -bottom-10 w-[520px] max-w-[110%] opacity-[0.08] pointer-events-none" aria-hidden>
-          <BrandSymbol tone="white" className="w-full h-auto" />
+          <BrandSymbol tone="white" className="w-full h-auto" sizes="520px" />
         </div>
         <div className="relative flex-1 flex flex-col items-center justify-center px-8 pt-12 pb-16 md:py-16">
-          <BrandLogo tone="white" className="w-56 md:w-80" priority />
+          <BrandLogo tone="white" className="w-56 md:w-80" sizes="(min-width: 768px) 320px, 224px" priority />
           <p className="mt-6 max-w-xs text-center text-sm md:text-base text-white/80 leading-relaxed">
             Cuidado, organização e evolução de cada praticante em um só lugar.
           </p>
@@ -24,7 +24,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
         </svg>
       </section>
       <section className="flex-1 flex items-start md:items-center justify-center px-5 pb-10 -mt-6 md:mt-0 md:px-12">
-        <div className="w-full max-w-sm animate-rise">{children}</div>
+        <div className="w-full max-w-sm">{children}</div>
       </section>
     </main>
   );

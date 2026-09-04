@@ -10,7 +10,7 @@ export function Timeline({ items }: { items: { date: string; kind: string; title
         <li key={i} className="pl-5">
           <span className={`absolute -left-[7px] mt-1.5 h-3 w-3 rounded-full ${dot[it.tone]}`} />
           <p className="text-xs text-ink-500">{isoToBR(it.date)}</p>
-          {it.href ? <Link href={it.href as never} className="font-medium hover:underline">{it.title}</Link> : <p className="font-medium">{it.title}</p>}
+          {it.href ? <Link prefetch={false} href={it.href as never} className="font-medium hover:underline">{it.title}</Link> : <p className="font-medium">{it.title}</p>}
           {it.description && <p className="text-sm text-ink-700">{it.description}</p>}
         </li>
       ))}

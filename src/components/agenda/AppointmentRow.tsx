@@ -10,7 +10,7 @@ export function AppointmentRow({ a, canRecord, canManage, showDate, linkPractiti
         <div className="min-w-0">
           <p className="font-medium">
             <span className="tabular-nums text-primary-800 mr-2">{showDate ? `${a.date.slice(8, 10)}/${a.date.slice(5, 7)} ` : ""}{a.startTime}</span>
-            {linkPractitioner ? <Link href={`/praticantes/${a.practitionerId}`} className="hover:underline">{a.practitionerName}</Link> : a.practitionerName}
+            {linkPractitioner ? <Link prefetch={false} href={`/praticantes/${a.practitionerId}`} className="hover:underline">{a.practitionerName}</Link> : a.practitionerName}
           </p>
           <p className="text-sm text-ink-500">{a.type} · {a.professionalName}{a.notes ? ` · ${a.notes}` : ""}</p>
         </div>

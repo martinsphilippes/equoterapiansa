@@ -11,6 +11,12 @@ import { todayISO } from "@/lib/domain/dates";
 import type { Assessment, AssessmentCategory, AssessmentScore, AssessmentType, EvolutionReport } from "@/lib/db/types";
 import { guard, str, opt, bool, success, fail, ISO_DATE, type ActionResult } from "./result";
 
+function summarizeAssessments(list: Assessment[]) {
+  if (list.length === 0) return { count: 0, lastDate: null, lastCreatedAt: 0 };
+  const last = [...list].sort((a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt)[list.length - 1];
+  return { count: list.length, lastDate: last.date, lastCreatedAt: Math.max(...list.map((a) => a.createdAt)) };
+}
+
 async function activeCategories(): Promise<AssessmentCategory[]> {
   return mapDocs(await Collections.assessmentCategories().get()).filter((c) => c.active).sort((a, b) => a.order - b.order).map((c) => ({ ...c, items: c.items.filter((i) => i.active) }));
 }
@@ -70,6 +76,7 @@ export async function saveAssessment(_prev: ActionResult | null, fd: FormData): 
     };
     const batch = db.batch();
     batch.set(ref, data);
+    batch.set(Collections.practitioners().doc(practitionerId), { assessmentSummary: summarizeAssessments([...all.filter((a) => a.id !== ref.id), data]) }, { merge: true });
     await audit(actorOf(user), { action: existing ? "assessment.update" : "assessment.create", entity: "assessment", entityId: ref.id, entityLabel: `${p.name} ${date}`, details: { type, overallAverage, filled } }, batch);
     await batch.commit();
     revalidatePath(`/praticantes/${practitionerId}`);
@@ -83,8 +90,10 @@ export async function deleteAssessment(_prev: ActionResult | null, fd: FormData)
     const id = str(fd, "id");
     const a = await getDoc(Collections.assessments(), id);
     if (!a) return fail("Avaliação não encontrada.");
+    const remaining = mapDocs(await Collections.assessments().where("practitionerId", "==", a.practitionerId).get()).filter((x) => x.id !== id);
     const batch = db.batch();
     batch.delete(Collections.assessments().doc(id));
+    batch.set(Collections.practitioners().doc(a.practitionerId), { assessmentSummary: summarizeAssessments(remaining) }, { merge: true });
     await audit(actorOf(user), { action: "assessment.delete", entity: "assessment", entityId: id, entityLabel: `${a.practitionerName} ${a.date}`, details: { before: a } }, batch);
     await batch.commit();
     revalidatePath(`/praticantes/${a.practitionerId}`);
@@ -105,6 +114,7 @@ async function createReport(userId: string, opts: { practitionerId: string; titl
     sharedWithGuardians: opts.sharedWithGuardians, createdAt: Date.now(), createdBy: userId,
   };
   batch.set(ref, report);
+  batch.set(Collections.practitioners().doc(p.id), { lastReportAt: report.createdAt }, { merge: true });
   return report;
 }
 

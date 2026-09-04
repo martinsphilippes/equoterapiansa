@@ -35,12 +35,12 @@ export default async function AgendaPage({ searchParams }: { searchParams: Searc
       <PageHeader title="Agenda" subtitle={title} actions={canManage && <LinkButton href={`/agenda/novo?data=${date}`}>+ Agendar</LinkButton>} />
       <div className="flex flex-wrap items-center gap-2 no-print">
         <div className="flex rounded-xl bg-surface border border-border p-0.5">
-          {(["dia", "semana", "mes"] as const).map((v) => <Link key={v} href={q(date, v)} className={`px-3 py-1.5 rounded-lg text-sm capitalize ${view === v ? "bg-primary-600 text-white" : "text-ink-700"}`}>{v === "mes" ? "Mês" : v}</Link>)}
+          {(["dia", "semana", "mes"] as const).map((v) => <Link prefetch={false} key={v} href={q(date, v)} className={`px-3 py-1.5 rounded-lg text-sm capitalize ${view === v ? "bg-primary-600 text-white" : "text-ink-700"}`}>{v === "mes" ? "Mês" : v}</Link>)}
         </div>
         <div className="flex items-center gap-1 ml-auto">
-          <Link href={q(prev)} className="px-3 py-1.5 rounded-xl bg-surface border border-border">‹</Link>
-          <Link href={q(today)} className="px-3 py-1.5 rounded-xl bg-surface border border-border text-sm">Hoje</Link>
-          <Link href={q(next)} className="px-3 py-1.5 rounded-xl bg-surface border border-border">›</Link>
+          <Link prefetch={false} href={q(prev)} className="px-3 py-1.5 rounded-xl bg-surface border border-border">‹</Link>
+          <Link prefetch={false} href={q(today)} className="px-3 py-1.5 rounded-xl bg-surface border border-border text-sm">Hoje</Link>
+          <Link prefetch={false} href={q(next)} className="px-3 py-1.5 rounded-xl bg-surface border border-border">›</Link>
         </div>
       </div>
 
@@ -49,7 +49,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Searc
       ) : view === "semana" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
           {listDays(start, end).map((d) => (
-            <Card key={d} className={`p-0 ${d === today ? "ring-2 ring-primary-300" : ""}`} title={<Link href={q(d, "dia")} className="hover:underline">{weekdayLabel(d)} <span className="text-ink-500 font-normal">{isoToBR(d).slice(0, 5)}</span></Link>}>
+            <Card key={d} className={`p-0 ${d === today ? "ring-2 ring-primary-300" : ""}`} title={<Link prefetch={false} href={q(d, "dia")} className="hover:underline">{weekdayLabel(d)} <span className="text-ink-500 font-normal">{isoToBR(d).slice(0, 5)}</span></Link>}>
               {(byDay.get(d) ?? []).length === 0 ? <p className="text-sm text-ink-300 px-1">Sem atendimentos</p> : (
                 <ul className="divide-y divide-border -m-5">{(byDay.get(d) ?? []).map((a) => <AppointmentRow key={a.id} a={a} canRecord={canRecord} canManage={canManage} linkPractitioner={canOpen} compact />)}</ul>
               )}
@@ -84,7 +84,7 @@ function MonthGrid({ start, end, byDay, today }: { start: string; end: string; b
           const missed = list.filter((a) => a.status === "missed").length;
           const pending = list.filter((a) => a.status === "scheduled" || a.status === "confirmed").length;
           return (
-            <Link key={d} href={`/agenda?visao=dia&data=${d}`} className={`min-h-16 border-b border-r border-border p-1.5 hover:bg-surface-50 ${d === today ? "bg-primary-50" : ""}`}>
+            <Link prefetch={false} key={d} href={`/agenda?visao=dia&data=${d}`} className={`min-h-16 border-b border-r border-border p-1.5 hover:bg-surface-50 ${d === today ? "bg-primary-50" : ""}`}>
               <span className={`text-xs ${d === today ? "font-bold text-primary-800" : "text-ink-500"}`}>{Number(d.slice(8, 10))}</span>
               <div className="mt-1 flex flex-wrap gap-0.5">
                 {pending > 0 && <span className="text-[10px] rounded bg-sky-100 text-sky-800 px-1">{pending}</span>}

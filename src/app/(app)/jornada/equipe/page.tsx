@@ -28,10 +28,10 @@ export default async function TeamTimePage({ searchParams }: { searchParams: Sea
     <div className="space-y-5">
       <PageHeader title="Jornada da equipe" subtitle={`${weekdayLabel(date)}, ${isoToBR(date)} · ${present} presente${present === 1 ? "" : "s"} de ${rows.filter((r) => r.isWorking).length} previstos`} />
       <div className="flex items-center gap-2 no-print">
-        <Link href={`/jornada/equipe?data=${addDays(date, -1)}`} className="px-3 py-2 rounded-xl bg-surface border border-border">‹</Link>
+        <Link prefetch={false} href={`/jornada/equipe?data=${addDays(date, -1)}`} className="px-3 py-2 rounded-xl bg-surface border border-border">‹</Link>
         <form className="flex-1"><Input type="date" name="data" defaultValue={date} onChange={undefined} className="max-w-xs" /></form>
-        <Link href={`/jornada/equipe?data=${addDays(date, 1)}`} className="px-3 py-2 rounded-xl bg-surface border border-border">›</Link>
-        <Link href="/jornada/equipe" className="text-sm text-primary-700">Hoje</Link>
+        <Link prefetch={false} href={`/jornada/equipe?data=${addDays(date, 1)}`} className="px-3 py-2 rounded-xl bg-surface border border-border">›</Link>
+        <Link prefetch={false} href="/jornada/equipe" className="text-sm text-primary-700">Hoje</Link>
       </div>
       <Card>
         <Table>
@@ -39,7 +39,7 @@ export default async function TeamTimePage({ searchParams }: { searchParams: Sea
           <tbody>
             {rows.map(({ c, e, isWorking }) => (
               <TeamDayEditor key={c.id} collaboratorId={c.id} date={date} entry={e ?? null}
-                name={<Link href={`/colaboradores/${c.id}/jornada?mes=${date.slice(0, 7)}`} className="font-medium hover:underline">{c.name}<span className="block text-xs text-ink-500 font-normal">{c.jobRoleName}</span></Link>}
+                name={<Link prefetch={false} href={`/colaboradores/${c.id}/jornada?mes=${date.slice(0, 7)}`} className="font-medium hover:underline">{c.name}<span className="block text-xs text-ink-500 font-normal">{c.jobRoleName}</span></Link>}
                 status={<DayStatus entry={e} isWorking={isWorking} isPast={date < today} />}
                 periods={e?.periods.map((p) => `${p.in}→${p.out ?? "…"}`).join("  ") ?? ""}
                 total={e?.status === "present" ? minutesToHM(e.workedMinutes) : ""}

@@ -19,7 +19,7 @@ export function ReportView({ report: r, practitioner: p, orgName, assessments }:
           <h1 className="text-2xl font-extrabold tracking-tight mt-1">{r.title}</h1>
           <p className="text-ink-700">{p.name}{s.age !== null ? `, ${s.age} anos` : ""} · Período: {isoToBR(r.periodStart)} a {isoToBR(r.periodEnd)}</p>
         </div>
-        <BrandLogo className="w-24 md:w-28 shrink-0" />
+        <BrandLogo className="w-24 md:w-28 shrink-0" sizes="112px" />
       </header>
 
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">

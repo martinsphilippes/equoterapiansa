@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { RegisterSW } from "@/components/layout/RegisterSW";
+
+const manrope = localFont({ src: "../fonts/manrope-latin.woff2", variable: "--font-manrope", display: "optional", weight: "200 800", adjustFontFallback: "Arial", preload: true });
 
 export const metadata: Metadata = {
   title: { default: "Equoterapia Nossa Senhora Aparecida", template: "%s · Equoterapia NSA" },
@@ -23,7 +26,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className="h-full antialiased">
+    <html lang="pt-BR" className={`h-full antialiased ${manrope.variable}`}>
       <body className="min-h-full flex flex-col">
         {children}
         <RegisterSW />

@@ -20,7 +20,7 @@ export default async function PractitionerSessionsPage({ params }: { params: Par
           {sessions.map((s) => (
             <li key={s.id} className="px-4 py-3">
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <Link href={`/atendimentos/${s.id}`} className="font-medium hover:underline">{isoToBR(s.date)} {s.time} <span className="text-ink-500 font-normal">· {s.professionalName}</span></Link>
+                <Link prefetch={false} href={`/atendimentos/${s.id}`} className="font-medium hover:underline">{isoToBR(s.date)} {s.time} <span className="text-ink-500 font-normal">· {s.professionalName}</span></Link>
                 {s.attended ? <Badge tone="green">Presente</Badge> : <Badge tone="red">Faltou</Badge>}
               </div>
               {s.attended && (s.activities.length > 0 || s.objective) && <p className="text-sm text-ink-700 mt-1">{s.objective ? `Objetivo: ${s.objective}. ` : ""}{s.activities.join(", ")}</p>}

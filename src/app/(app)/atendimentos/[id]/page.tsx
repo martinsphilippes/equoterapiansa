@@ -31,7 +31,7 @@ export default async function SessionPage({ params, searchParams }: { params: Pa
   }
   return (
     <div className="max-w-2xl">
-      <PageHeader title={`Atendimento · ${isoToBR(s.date)} ${s.time}`} subtitle={<Link href={`/praticantes/${p.id}/atendimentos`} className="text-primary-700 hover:underline">{p.name}</Link>} actions={canEdit && <Link href={`/atendimentos/${id}?editar=1`} className="text-sm text-primary-700 hover:underline">Editar</Link>} />
+      <PageHeader title={`Atendimento · ${isoToBR(s.date)} ${s.time}`} subtitle={<Link prefetch={false} href={`/praticantes/${p.id}/atendimentos`} className="text-primary-700 hover:underline">{p.name}</Link>} actions={canEdit && <Link prefetch={false} href={`/atendimentos/${id}?editar=1`} className="text-sm text-primary-700 hover:underline">Editar</Link>} />
       <Card>
         <div className="mb-4">{s.attended ? <Badge tone="green">Presente</Badge> : <Badge tone="red">Faltou</Badge>}</div>
         <DescriptionList items={[

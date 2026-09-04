@@ -21,7 +21,7 @@ export default async function AssessmentsPage({ params }: { params: Params<{ id:
         <ul className="divide-y divide-border -mt-5">
           {list.map((a) => (
             <li key={a.id}>
-              <Link href={`/praticantes/${id}/avaliacoes/${a.id}`} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-surface-50">
+              <Link prefetch={false} href={`/praticantes/${id}/avaliacoes/${a.id}`} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-surface-50">
                 <div>
                   <p className="font-medium">{isoToBR(a.date)} <Badge tone={a.type === "initial" ? "blue" : a.type === "final" ? "gray" : "green"} className="ml-1">{TYPE[a.type]}</Badge></p>
                   <p className="text-sm text-ink-500">{a.professionalName}</p>

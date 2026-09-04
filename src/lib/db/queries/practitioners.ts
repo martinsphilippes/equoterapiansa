@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { Collections, getMany, mapDocs } from "../collections";
 import type { Appointment, Assessment, Guardian, Practitioner, Session, UserProfile } from "../types";
 import { canAccessPractitioner } from "@/lib/auth/session";
@@ -22,16 +23,19 @@ export async function listPractitioners(user: UserProfile, opts?: { status?: Pra
   return items.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 }
 
-export async function getPractitionerFor(user: UserProfile, id: string): Promise<Practitioner | null> {
+const getPractitionerDoc = cache(async (id: string): Promise<Practitioner | null> => {
   const snap = await Collections.practitioners().doc(id).get();
-  if (!snap.exists) return null;
-  const p = { ...(snap.data() as Practitioner), id: snap.id };
-  return canAccessPractitioner(user, p) ? p : null;
+  return snap.exists ? { ...(snap.data() as Practitioner), id: snap.id } : null;
+});
+
+export async function getPractitionerFor(user: UserProfile, id: string): Promise<Practitioner | null> {
+  const p = await getPractitionerDoc(id);
+  return p && canAccessPractitioner(user, p) ? p : null;
 }
 
-export async function listGuardians(): Promise<Guardian[]> {
+export const listGuardians = cache(async (): Promise<Guardian[]> => {
   return mapDocs(await Collections.guardians().get()).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
-}
+});
 
 export async function guardiansOf(p: Practitioner): Promise<Guardian[]> {
   return getMany(Collections.guardians(), p.guardianIds);
@@ -44,21 +48,21 @@ export async function appointmentsInRange(start: string, end: string, filter?: {
   return mapDocs(await q.get()).sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
 }
 
-export async function appointmentsOfPractitioner(practitionerId: string): Promise<Appointment[]> {
+export const appointmentsOfPractitioner = cache(async (practitionerId: string): Promise<Appointment[]> => {
   return mapDocs(await Collections.appointments().where("practitionerId", "==", practitionerId).get()).sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
-}
+});
 
-export async function sessionsOfPractitioner(practitionerId: string): Promise<Session[]> {
+export const sessionsOfPractitioner = cache(async (practitionerId: string): Promise<Session[]> => {
   return mapDocs(await Collections.sessions().where("practitionerId", "==", practitionerId).get()).sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
-}
+});
 
-export async function assessmentsOfPractitioner(practitionerId: string): Promise<Assessment[]> {
+export const assessmentsOfPractitioner = cache(async (practitionerId: string): Promise<Assessment[]> => {
   return mapDocs(await Collections.assessments().where("practitionerId", "==", practitionerId).get()).sort((a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
-}
+});
 
 /** Profissionais de atendimento ativos (colaboradores com função marcada como profissional). */
-export async function listProfessionals() {
+export const listProfessionals = cache(async () => {
   const [roles, collabs] = await Promise.all([Collections.jobRoles().get(), Collections.collaborators().where("status", "==", "active").get()]);
   const profRoles = new Set(mapDocs(roles).filter((r) => r.isProfessional).map((r) => r.id));
   return mapDocs(collabs).filter((c) => c.jobRoleId && profRoles.has(c.jobRoleId)).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
-}
+});

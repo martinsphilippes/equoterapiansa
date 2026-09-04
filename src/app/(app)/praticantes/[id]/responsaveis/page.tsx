@@ -20,7 +20,7 @@ export default async function PractitionerGuardiansPage({ params }: { params: Pa
           {guardians.map((g) => (
             <li key={g.id} className="py-3 flex items-center justify-between gap-3">
               <div>
-                <Link href={`/responsaveis/${g.id}`} className="font-medium hover:underline">{g.name}</Link>
+                <Link prefetch={false} href={`/responsaveis/${g.id}`} className="font-medium hover:underline">{g.name}</Link>
                 <p className="text-sm text-ink-500">{g.relationship} · {formatPhone(g.phone)}{g.email ? ` · ${g.email}` : ""}</p>
               </div>
               {g.userId ? <Badge tone="green">Com acesso</Badge> : <Badge tone="gray">Sem acesso</Badge>}

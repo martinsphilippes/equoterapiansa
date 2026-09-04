@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requirePermission } from "@/lib/auth/session";
 import { Collections, getDoc } from "@/lib/db/collections";
+import { getCollaborator } from "@/lib/db/queries/collaborators";
 import { Alert, Card, Field, Input, Select, Badge } from "@/components/ui";
 import { ActionForm } from "@/components/ui/ActionForm";
 import { SubmitButton } from "@/components/ui/FormStatus";
@@ -13,7 +14,7 @@ import Link from "next/link";
 export default async function CollaboratorAccessPage({ params }: { params: Params<{ id: string }> }) {
   const user = await requirePermission("users.manage");
   const { id } = await params;
-  const c = await getDoc(Collections.collaborators(), id);
+  const c = await getCollaborator(id);
   if (!c) notFound();
   const account = c.userId ? await getDoc(Collections.users(), c.userId) : null;
   const jobRole = c.jobRoleId ? await getDoc(Collections.jobRoles(), c.jobRoleId) : null;
@@ -27,7 +28,7 @@ export default async function CollaboratorAccessPage({ params }: { params: Param
             <div className="flex justify-between"><dt className="text-ink-500">Perfil</dt><dd>{ROLE_LABELS[account.role]}</dd></div>
             <div className="flex justify-between"><dt className="text-ink-500">Situação</dt><dd>{account.active ? <Badge tone="green">Ativo</Badge> : <Badge tone="red">Desativado</Badge>}</dd></div>
           </dl>
-          <p className="text-xs text-ink-500 mt-3">Para ajustar o perfil e as permissões detalhadas, use <Link href="/configuracoes/usuarios" className="text-primary-700 hover:underline">Configurações → Usuários</Link>.</p>
+          <p className="text-xs text-ink-500 mt-3">Para ajustar o perfil e as permissões detalhadas, use <Link prefetch={false} href="/configuracoes/usuarios" className="text-primary-700 hover:underline">Configurações → Usuários</Link>.</p>
           <div className="flex flex-wrap gap-2 mt-4">
             <ActionForm action={resetUserPassword}>
               <input type="hidden" name="userId" value={account.id} />

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requirePermission, hasPermission } from "@/lib/auth/session";
-import { Collections, getDoc } from "@/lib/db/collections";
+import { getCollaborator } from "@/lib/db/queries/collaborators";
 import { getSettings } from "@/lib/db/settings";
 import { timeEntriesOfMonth, computeMonthFor } from "@/lib/db/queries/payroll";
 import { monthDaysFor } from "@/lib/db/queries/time";
@@ -18,7 +18,7 @@ export default async function CollaboratorTimePage({ params, searchParams }: { p
   const sp = await searchParams;
   const settings = await getSettings();
   const competence = sp1(sp, "mes") ?? currentCompetence(settings.timezone);
-  const c = await getDoc(Collections.collaborators(), id);
+  const c = await getCollaborator(id);
   if (!c) notFound();
   const [entries, days] = await Promise.all([timeEntriesOfMonth(id, competence), monthDaysFor(c, competence)]);
   const summary = computeMonthFor(c, competence, entries, settings);

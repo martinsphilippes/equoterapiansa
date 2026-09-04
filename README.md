@@ -98,3 +98,9 @@ e2e/                  testes de fumaça com Playwright contra os emuladores
 - **Frequência** = realizadas ÷ (realizadas + faltas). Cancelamentos e reagendamentos não penalizam o praticante.
 - **Evolução** = comparação das médias por área entre a avaliação inicial e a mais recente; a porcentagem é relativa à média inicial. Cada avaliação guarda a escala e as categorias usadas na época (histórico estável mesmo se a configuração mudar).
 - **Encerramento** registra data, motivo, avaliação final, responsável pela decisão e gera o relatório final; cancela agendamentos futuros. O sistema não decide alta.
+
+## Performance (como medir)
+
+- `MEASURE_READS=1` ativa um contador de leituras do Firestore no servidor (`/api/perf-reads`), usado só em auditoria local.
+- `e2e/perf.mjs` mede, por tela e em build de produção: TTFB, LCP, CLS, requisições, bytes por tipo e leituras/idas ao banco. Uso: `npm run build && MEASURE_READS=1 npm start -- -p 3100` e `PERF_LABEL=x node e2e/perf.mjs`.
+- Decisões que mantêm o custo previsível: consultas deduplicadas por requisição (`cache()` do React), folha em lote (3 consultas para todos os colaboradores), resumos denormalizados no praticante para o painel, `prefetch={false}` nos links (cada prefetch de rota dinâmica executaria layouts e consultas no servidor), gráficos em SVG renderizados no servidor, imagens da marca com `sizes` explícito e fonte auto-hospedada com `display: optional`.

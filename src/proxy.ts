@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC = ["/entrar", "/configuracao-inicial", "/manifest.webmanifest", "/sw.js", "/icons", "/api/auth", "/api/setup", "/offline"];
+const PUBLIC = ["/entrar", "/configuracao-inicial", "/manifest.webmanifest", "/sw.js", "/icons", "/api/auth", "/api/setup", "/api/perf-reads", "/offline"];
 
 /**
  * Apenas verifica a presença do cookie de sessão para redirecionar cedo.

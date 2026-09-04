@@ -33,7 +33,7 @@ export default async function GuardianPage({ params }: { params: Params<{ id: st
           </Card>
           <Card title="Praticantes">
             {practitioners.length === 0 ? <p className="text-sm text-ink-500">Nenhum praticante vinculado.</p> : (
-              <ul className="divide-y divide-border">{practitioners.map((p) => <li key={p.id} className="py-2"><Link href={`/praticantes/${p.id}`} className="font-medium hover:underline">{p.name}</Link></li>)}</ul>
+              <ul className="divide-y divide-border">{practitioners.map((p) => <li key={p.id} className="py-2"><Link prefetch={false} href={`/praticantes/${p.id}`} className="font-medium hover:underline">{p.name}</Link></li>)}</ul>
             )}
           </Card>
         </div>

@@ -2,6 +2,7 @@ import "server-only";
 import { getApps, initializeApp, cert, type App } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
+import { installReadCounter } from "./measure";
 
 /**
  * Inicialização única do Firebase Admin.
@@ -27,6 +28,7 @@ function init(): App {
 }
 
 export const adminApp = init();
+installReadCounter();
 export const adminAuth = getAuth(adminApp);
 export const db = getFirestore(adminApp);
 export const isEmulator = !!process.env.FIRESTORE_EMULATOR_HOST;

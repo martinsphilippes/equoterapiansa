@@ -195,6 +195,10 @@ export interface Practitioner {
   guardianIds: string[];
   /** Profissionais que acompanham este praticante (controle de acesso). */
   professionalIds: string[];
+  /** Resumo mantido pelas actions de avaliação (evita varrer a coleção no painel). */
+  assessmentSummary?: { count: number; lastDate: ISODate | null; lastCreatedAt: number } | null;
+  /** Data (ms) do último relatório gerado. */
+  lastReportAt?: number | null;
   closure?: {
     date: ISODate;
     reason: string;

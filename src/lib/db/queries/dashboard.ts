@@ -4,29 +4,33 @@ import { getSettings } from "../settings";
 import { listCollaborators, pendingDocumentsCount } from "./collaborators";
 import { entriesOfDay } from "./time";
 import { appointmentsInRange } from "./practitioners";
-import { buildPayrollMonth } from "./payroll";
+import { buildPayrollMonths } from "./payroll";
 import { isWorkingDay, scheduleFor } from "@/lib/domain/time";
-import { addMonths, currentCompetence, monthRange, nowHM, todayISO } from "@/lib/domain/dates";
+import { addDays, addMonths, currentCompetence, monthRange, nowHM, todayISO } from "@/lib/domain/dates";
 
+/**
+ * Indicadores do painel com número fixo de consultas (não cresce com a base):
+ * colaboradores, jornada de hoje, jornada do mês, agenda (hoje + 7 dias), praticantes ativos,
+ * fechamentos do mês anterior, tipos e documentos. Avaliações e relatórios usam o resumo
+ * mantido no próprio praticante (assessmentSummary / lastReportAt).
+ */
 export async function dashboardData() {
   const settings = await getSettings();
   const today = todayISO(settings.timezone);
   const competence = currentCompetence(settings.timezone);
   const prevCompetence = addMonths(competence, -1);
   const { start, end } = monthRange(competence);
+  const weekEnd = addDays(today, 7);
 
-  const [collaborators, todayEntries, todayAppts, practitionersSnap, assessmentsSnap, reportsSnap, monthEntriesSnap] = await Promise.all([
+  const [collaborators, todayEntries, weekAppts, practitionersSnap, monthEntriesSnap] = await Promise.all([
     listCollaborators({ status: "active" }),
     entriesOfDay(today),
-    appointmentsInRange(today, today),
+    appointmentsInRange(today, weekEnd),
     Collections.practitioners().where("status", "in", ["active", "reassessment"]).get(),
-    Collections.assessments().get(),
-    Collections.reports().get(),
     Collections.timeEntries().where("date", ">=", start).where("date", "<=", end).get(),
   ]);
   const practitioners = mapDocs(practitionersSnap);
-  const assessments = mapDocs(assessmentsSnap);
-  const reports = mapDocs(reportsSnap);
+  const todayAppts = weekAppts.filter((a) => a.date === today);
 
   // Colaboradores
   const expectedToday = collaborators.filter((c) => isWorkingDay(today, scheduleFor(settings, c.schedule), settings.holidays));
@@ -34,28 +38,21 @@ export async function dashboardData() {
   const presentToday = expectedToday.filter((c) => presentIds.has(c.id)).length + todayEntries.filter((e) => e.status === "present" && !expectedToday.some((c) => c.id === e.collaboratorId)).length;
   const absentToday = expectedToday.filter((c) => !presentIds.has(c.id) && !todayEntries.some((e) => e.collaboratorId === c.id && (e.status === "justified" || e.status === "off"))).length;
   const monthMinutes = mapDocs(monthEntriesSnap).reduce((a, e) => a + (e.status === "present" ? e.workedMinutes : 0), 0);
-  const prevMonths = await Promise.all(collaborators.map((c) => buildPayrollMonth(c.id, prevCompetence)));
-  const pendingPayments = prevMonths.filter((m) => m && m.status === "unpaid").length;
+  const [prevMonths, docsCollab, docsPract] = await Promise.all([
+    buildPayrollMonths(collaborators, prevCompetence),
+    pendingDocumentsCount("collaborator", collaborators.map((c) => c.id)),
+    pendingDocumentsCount("practitioner", practitioners.map((p) => p.id)),
+  ]);
+  const pendingPayments = prevMonths.filter((m) => m.status === "unpaid").length;
 
-  // Praticantes
-  const lastAssessmentByP = new Map<string, string>();
-  for (const a of assessments) if (!lastAssessmentByP.has(a.practitionerId) || lastAssessmentByP.get(a.practitionerId)! < a.date) lastAssessmentByP.set(a.practitionerId, a.date);
+  // Praticantes (resumos denormalizados)
   const limit = addMonths(competence, -settings.assessmentIntervalMonths) + today.slice(7);
-  const assessmentsPending = practitioners.filter((p) => { const last = lastAssessmentByP.get(p.id); return !last || last < limit; });
-  const lastReportByP = new Map<string, number>();
-  for (const r of reports) lastReportByP.set(r.practitionerId, Math.max(lastReportByP.get(r.practitionerId) ?? 0, r.createdAt));
-  const reportsPending = practitioners.filter((p) => {
-    const count = assessments.filter((a) => a.practitionerId === p.id).length;
-    if (count < 2) return false;
-    const lastA = assessments.filter((a) => a.practitionerId === p.id).sort((x, y) => y.createdAt - x.createdAt)[0];
-    return (lastReportByP.get(p.id) ?? 0) < lastA.createdAt;
-  });
+  const assessmentsPending = practitioners.filter((p) => { const last = p.assessmentSummary?.lastDate ?? null; return !last || last < limit; });
+  const reportsPending = practitioners.filter((p) => (p.assessmentSummary?.count ?? 0) >= 2 && (p.lastReportAt ?? 0) < (p.assessmentSummary?.lastCreatedAt ?? 0));
 
   // Operação
   const now = nowHM(settings.timezone);
-  const upcoming = (await appointmentsInRange(today, today.slice(0, 8) + "31" > today ? addDaysSafe(today, 7) : addDaysSafe(today, 7)))
-    .filter((a) => (a.status === "scheduled" || a.status === "confirmed") && (a.date > today || a.startTime >= now)).slice(0, 6);
-  const [docsCollab, docsPract] = await Promise.all([pendingDocumentsCount("collaborator", collaborators.map((c) => c.id)), pendingDocumentsCount("practitioner", practitioners.map((p) => p.id))]);
+  const upcoming = weekAppts.filter((a) => (a.status === "scheduled" || a.status === "confirmed") && (a.date > today || a.startTime >= now)).slice(0, 6);
 
   return {
     today, competence, prevCompetence,
@@ -63,9 +60,4 @@ export async function dashboardData() {
     practitioners: { active: practitioners.length, appointmentsToday: todayAppts.length, presentToday: todayAppts.filter((a) => a.status === "done").length, missedToday: todayAppts.filter((a) => a.status === "missed").length, pendingToday: todayAppts.filter((a) => a.status === "scheduled" || a.status === "confirmed").length, assessmentsPending },
     operation: { upcoming, reportsPending, documentsPending: docsCollab.length + docsPract.length, docsCollab, docsPract },
   };
-}
-
-function addDaysSafe(iso: string, days: number) {
-  const [y, m, d] = iso.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
 }

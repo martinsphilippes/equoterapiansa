@@ -36,7 +36,7 @@ export default async function AssessmentPage({ params, searchParams }: { params:
   return (
     <div className="space-y-4">
       <PageHeader title={TYPE[a.type]} subtitle={`${isoToBR(a.date)} · ${a.professionalName}`} back={`/praticantes/${id}/avaliacoes`} actions={<>
-        {canEdit && <Link href={`/praticantes/${id}/avaliacoes/${aid}?editar=1`} className="inline-flex items-center h-9 px-3 rounded-xl border border-border bg-surface text-sm">Editar</Link>}
+        {canEdit && <Link prefetch={false} href={`/praticantes/${id}/avaliacoes/${aid}?editar=1`} className="inline-flex items-center h-9 px-3 rounded-xl border border-border bg-surface text-sm">Editar</Link>}
         {hasPermission(user, "practitioners.manage") && <ActionForm action={deleteAssessment}><input type="hidden" name="id" value={aid} /><ConfirmButton message="Excluir esta avaliação? Esta ação fica registrada na auditoria." variant="ghost" size="sm" className="text-red-700">Excluir</ConfirmButton></ActionForm>}
       </>} />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

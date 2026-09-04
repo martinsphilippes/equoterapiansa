@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "@fontsource-variable/manrope";
 
 /*
   Design system — Equoterapia Nossa Senhora Aparecida
@@ -58,7 +57,7 @@
   --color-info: #2433d6;
   --color-info-soft: #eef0fd;
 
-  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --radius-xl: 0.9rem;
   --radius-2xl: 1.25rem;
@@ -107,7 +106,7 @@ h1, h2, h3 {
 
 /* Marca d'água do símbolo (estados vazios, heróis) */
 .brand-watermark {
-  background-image: url("/brand/symbol-white.png");
+  background-image: url("/brand/symbol-white-320.png");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: right bottom;
