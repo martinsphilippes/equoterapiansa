@@ -1,35 +1,37 @@
 {
   "indexes": [
-    { "collectionGroup": "timeEntries", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "collaboratorId", "order": "ASCENDING" }, { "fieldPath": "date", "order": "ASCENDING" } ] },
-    { "collectionGroup": "timeEntries", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "date", "order": "ASCENDING" }, { "fieldPath": "collaboratorId", "order": "ASCENDING" } ] },
-    { "collectionGroup": "payrollMonths", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "collaboratorId", "order": "ASCENDING" }, { "fieldPath": "competence", "order": "DESCENDING" } ] },
-    { "collectionGroup": "payrollMonths", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "competence", "order": "DESCENDING" } ] },
-    { "collectionGroup": "documents", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "ownerType", "order": "ASCENDING" }, { "fieldPath": "ownerId", "order": "ASCENDING" }, { "fieldPath": "uploadedAt", "order": "DESCENDING" } ] },
-    { "collectionGroup": "appointments", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "date", "order": "ASCENDING" }, { "fieldPath": "startTime", "order": "ASCENDING" } ] },
-    { "collectionGroup": "appointments", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "practitionerId", "order": "ASCENDING" }, { "fieldPath": "date", "order": "ASCENDING" }, { "fieldPath": "startTime", "order": "ASCENDING" } ] },
-    { "collectionGroup": "appointments", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "professionalId", "order": "ASCENDING" }, { "fieldPath": "date", "order": "ASCENDING" }, { "fieldPath": "startTime", "order": "ASCENDING" } ] },
-    { "collectionGroup": "sessions", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "practitionerId", "order": "ASCENDING" }, { "fieldPath": "date", "order": "DESCENDING" } ] },
-    { "collectionGroup": "assessments", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "practitionerId", "order": "ASCENDING" }, { "fieldPath": "date", "order": "ASCENDING" } ] },
-    { "collectionGroup": "reports", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "practitionerId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" } ] },
-    { "collectionGroup": "announcements", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "audience", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" } ] },
-    { "collectionGroup": "auditLogs", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "entity", "order": "ASCENDING" }, { "fieldPath": "at", "order": "DESCENDING" } ] },
-    { "collectionGroup": "practitioners", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" } ] },
-    { "collectionGroup": "collaborators", "queryScope": "COLLECTION", "fields": [
-      { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" } ] }
+    {
+      "collectionGroup": "timeEntries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "collaboratorId", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "appointments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "professionalId", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "appointments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "practitionerId", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "auditLogs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "entity", "order": "ASCENDING" },
+        { "fieldPath": "at", "order": "DESCENDING" }
+      ]
+    }
   ],
   "fieldOverrides": []
 }
