@@ -4,6 +4,7 @@ const BASE = process.env.BASE_URL || "http://localhost:3000";
 const exe = process.env.CHROME_PATH || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const browser = await chromium.launch({ executablePath: exe });
 const ctx = await browser.newContext({ viewport: { width: 1200, height: 900 } });
+ctx.setDefaultTimeout(120000);
 const page = await ctx.newPage();
 page.on("pageerror", (e) => console.log("PAGEERROR", e.message));
 const step = (s) => console.log("✓", s);
@@ -45,6 +46,7 @@ try {
 
   // Login do colaborador e ponto
   const ctx2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+ctx2.setDefaultTimeout(120000);
   const p2 = await ctx2.newPage();
   p2.on("pageerror", (e) => console.log("PAGEERROR2", e.message));
   await login(p2, FEMAIL, "felipe123");

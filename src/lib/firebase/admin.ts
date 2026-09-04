@@ -2,7 +2,6 @@ import "server-only";
 import { getApps, initializeApp, cert, type App } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
-import { getStorage } from "firebase-admin/storage";
 
 /**
  * Inicialização única do Firebase Admin.
@@ -14,26 +13,22 @@ function init(): App {
   if (existing) return existing;
 
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-  const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
   const usingEmulators = !!process.env.FIRESTORE_EMULATOR_HOST;
 
   if (raw && !usingEmulators) {
     const json = JSON.parse(Buffer.from(raw, "base64").toString("utf8"));
-    return initializeApp({ credential: cert(json), projectId: json.project_id ?? projectId, storageBucket });
+    return initializeApp({ credential: cert(json), projectId: json.project_id ?? projectId });
   }
   if (!usingEmulators) {
-    throw new Error(
-      "FIREBASE_SERVICE_ACCOUNT_BASE64 não configurado. Veja .env.example e README.md."
-    );
+    throw new Error("FIREBASE_SERVICE_ACCOUNT_BASE64 não configurado. Veja .env.example e README.md.");
   }
-  return initializeApp({ projectId, storageBucket });
+  return initializeApp({ projectId });
 }
 
 export const adminApp = init();
 export const adminAuth = getAuth(adminApp);
 export const db = getFirestore(adminApp);
-export const bucket = () => getStorage(adminApp).bucket();
 export const isEmulator = !!process.env.FIRESTORE_EMULATOR_HOST;
 export { FieldValue, Timestamp };
 

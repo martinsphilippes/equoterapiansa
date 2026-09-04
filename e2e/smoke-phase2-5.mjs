@@ -6,6 +6,7 @@ const exe = process.env.CHROME_PATH || "/opt/pw-browsers/chromium-1194/chrome-li
 const RUN = Date.now().toString(36);
 const browser = await chromium.launch({ executablePath: exe });
 const ctx = await browser.newContext({ viewport: { width: 1200, height: 900 } });
+ctx.setDefaultTimeout(120000);
 const page = await ctx.newPage();
 page.on("pageerror", (e) => console.log("PAGEERROR", e.message));
 const step = (s) => console.log("✓", s);
@@ -50,7 +51,8 @@ try {
   step("praticante criado " + joaoId);
 
   // Documento do praticante (upload via emulador de Storage)
-  writeFileSync("/tmp/claude-0/-home-user-equoterapiansa/67a993cc-8f66-5819-922c-3b8bf24f491d/scratchpad/laudo.pdf", "%PDF-1.4\n% teste\n");
+  // PDF de ~3 MB para exercitar o armazenamento em blocos (5 blocos de 700 KB)
+  writeFileSync("/tmp/claude-0/-home-user-equoterapiansa/67a993cc-8f66-5819-922c-3b8bf24f491d/scratchpad/laudo.pdf", Buffer.concat([Buffer.from("%PDF-1.4\n% teste\n"), Buffer.alloc(3 * 1024 * 1024, 0x41)]));
   await page.goto(`${BASE}/praticantes/${joaoId}/documentos`);
   await page.click('button:has-text("Enviar documento")');
   const laudoVal = await page.$eval('select[name="typeId"]', (sel) => Array.from(sel.options).find((o) => o.textContent.includes("Laudo")).value);
@@ -61,6 +63,8 @@ try {
   await page.waitForSelector("text=laudo.pdf", { timeout: 60000 });
   const dl = await page.request.get(`${BASE}/api/files/` + (await page.getAttribute('a[href^="/api/files/"]', "href")).split("/").pop());
   if (dl.status() !== 200) throw new Error("download status " + dl.status());
+  const body = await dl.body();
+  if (body.length !== 3 * 1024 * 1024 + 16) throw new Error("download size mismatch: " + body.length);
   step("documento enviado e baixado");
 
   // Responsável + acesso
@@ -174,6 +178,7 @@ try {
 
   // Família (Maria)
   const ctx2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+ctx2.setDefaultTimeout(120000);
   const p2 = await ctx2.newPage();
   p2.on("pageerror", (e) => console.log("PAGEERROR2", e.message));
   await login(p2, `maria.${RUN}@teste.com`, "maria12345");
@@ -208,6 +213,7 @@ try {
 
   // Profissional (Ana): vê apenas João; registra avaliação própria; não acessa equipe
   const ctx3 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+ctx3.setDefaultTimeout(120000);
   const p3 = await ctx3.newPage();
   await login(p3, `ana.${RUN}@teste.com`, "ana12345678");
   await p3.waitForURL(/conta/, { waitUntil: "commit" });

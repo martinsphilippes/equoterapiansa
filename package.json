@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "emulators": "firebase emulators:start --only auth,firestore,storage --project equoterapia-demo",
+    "emulators": "firebase emulators:start --only auth,firestore --project equoterapia-demo",
     "dev:emulators": "cp .env.emulator .env.local && next dev",
     "icons": "node scripts/make-icons.mjs",
     "e2e": "node e2e/smoke-auth.mjs && node e2e/smoke-phase1.mjs && node e2e/smoke-phase2-5.mjs"

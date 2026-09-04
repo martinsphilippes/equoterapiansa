@@ -1,41 +1,39 @@
 "use client";
 import { useRef, useState } from "react";
-import { signInWithCustomToken, signOut } from "firebase/auth";
-import { ref, uploadBytesResumable } from "firebase/storage";
 import { useRouter } from "next/navigation";
-import { clientAuth, clientStorage } from "@/lib/firebase/client";
 import { Button, Field, Input, Select, Alert } from "@/components/ui";
 import type { ActionResult } from "@/lib/actions/result";
 import type { DocumentType } from "@/lib/db/types";
 
 type Register = (prev: ActionResult | null, fd: FormData) => Promise<ActionResult>;
+const MAX = 4 * 1024 * 1024;
 
 /**
- * Envio de arquivo em 3 passos: token curto → upload direto ao Storage
- * (pasta temporária do usuário) → registro no servidor, que move o arquivo
- * para o destino definitivo e grava o documento com auditoria.
+ * Fotos e digitalizações de celular costumam ter 3–8 MB. Antes de enviar,
+ * imagens são redimensionadas (máx. 1600 px) e recomprimidas em JPEG no
+ * próprio navegador, o que costuma resultar em 200–600 KB. PDFs vão como estão.
  */
-export async function uploadToTemp(file: File, onProgress?: (pct: number) => void): Promise<{ tempPath: string }> {
-  const res = await fetch("/api/auth/upload-token", { method: "POST" });
-  if (!res.ok) throw new Error("Sem permissão para enviar arquivos.");
-  const { token, uid } = await res.json();
-  await signInWithCustomToken(clientAuth, token);
-  const tempPath = `uploads/${uid}/${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+export async function prepareFile(file: File, maxSide = 1600, quality = 0.82): Promise<File> {
+  if (!file.type.startsWith("image/") || file.type === "image/gif") return file;
   try {
-    await new Promise<void>((resolve, reject) => {
-      const task = uploadBytesResumable(ref(clientStorage, tempPath), file, { contentType: file.type || "application/octet-stream" });
-      task.on("state_changed", (s) => onProgress?.(Math.round((s.bytesTransferred / s.totalBytes) * 100)), reject, () => resolve());
-    });
-  } finally {
-    await signOut(clientAuth).catch(() => {});
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", quality));
+    if (!blob) return file;
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch {
+    return file;
   }
-  return { tempPath };
 }
 
 export function DocumentUploader({ ownerType, ownerId, types, register }: { ownerType: "collaborator" | "practitioner"; ownerId: string; types: DocumentType[]; register: Register }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [progress, setProgress] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [typeId, setTypeId] = useState(types[0]?.id ?? "");
   const formRef = useRef<HTMLFormElement>(null);
@@ -45,23 +43,16 @@ export function DocumentUploader({ ownerType, ownerId, types, register }: { owne
     e.preventDefault();
     setError(null);
     const fd = new FormData(e.currentTarget);
-    const file = fd.get("file") as File | null;
-    if (!file || file.size === 0) { setError("Selecione um arquivo."); return; }
-    if (file.size > 25 * 1024 * 1024) { setError("Arquivo acima de 25 MB."); return; }
+    const raw = fd.get("file") as File | null;
+    if (!raw || raw.size === 0) { setError("Selecione um arquivo."); return; }
+    setBusy(true);
     try {
-      setProgress(0);
-      const { tempPath } = await uploadToTemp(file, setProgress);
-      const body = new FormData();
-      body.set("ownerType", ownerType);
-      body.set("ownerId", ownerId);
-      body.set("typeId", String(fd.get("typeId")));
-      body.set("tempPath", tempPath);
-      body.set("fileName", file.name);
-      body.set("size", String(file.size));
-      body.set("contentType", file.type);
-      body.set("expiresAt", String(fd.get("expiresAt") ?? ""));
-      body.set("notes", String(fd.get("notes") ?? ""));
-      const r = await register(null, body);
+      const file = await prepareFile(raw);
+      if (file.size > MAX) throw new Error("Arquivo acima de 4 MB. Para PDFs, reduza a resolução do scanner (150 dpi costuma bastar).");
+      fd.set("file", file);
+      fd.set("ownerType", ownerType);
+      fd.set("ownerId", ownerId);
+      const r = await register(null, fd);
       if (!r.ok) throw new Error(r.error);
       formRef.current?.reset();
       setOpen(false);
@@ -69,7 +60,7 @@ export function DocumentUploader({ ownerType, ownerId, types, register }: { owne
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha no envio.");
     } finally {
-      setProgress(null);
+      setBusy(false);
     }
   }
 
@@ -83,14 +74,14 @@ export function DocumentUploader({ ownerType, ownerId, types, register }: { owne
           {types.map((t) => <option key={t.id} value={t.id}>{t.name}{t.required ? " (obrigatório)" : ""}</option>)}
         </Select>
       </Field>
-      <Field label="Arquivo" hint="PDF ou imagem, até 25 MB.">
+      <Field label="Arquivo" hint="PDF ou foto. Fotos são otimizadas automaticamente; PDFs até 4 MB.">
         <Input name="file" type="file" accept="application/pdf,image/*" required className="py-2" />
       </Field>
       {selected?.hasExpiry && <Field label="Válido até"><Input name="expiresAt" type="date" /></Field>}
       <Field label="Observação (opcional)"><Input name="notes" /></Field>
       <div className="flex gap-2">
-        <Button type="submit" disabled={progress !== null}>{progress === null ? "Enviar" : `Enviando ${progress}%`}</Button>
-        <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+        <Button type="submit" disabled={busy}>{busy ? "Enviando…" : "Enviar"}</Button>
+        <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={busy}>Cancelar</Button>
       </div>
     </form>
   );
@@ -101,15 +92,15 @@ export function PhotoUploader({ ownerId, save }: { ownerId: string; save: Regist
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   async function onChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const raw = e.target.files?.[0];
+    if (!raw) return;
     setBusy(true); setError(null);
     try {
-      const { tempPath } = await uploadToTemp(file);
-      const body = new FormData();
-      body.set("ownerId", ownerId);
-      body.set("tempPath", tempPath);
-      const r = await save(null, body);
+      const file = await prepareFile(raw, 600, 0.85);
+      const fd = new FormData();
+      fd.set("ownerId", ownerId);
+      fd.set("file", file);
+      const r = await save(null, fd);
       if (!r.ok) throw new Error(r.error);
       router.refresh();
     } catch (err) {
