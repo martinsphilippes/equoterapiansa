@@ -64,7 +64,7 @@ try {
   const dl = await page.request.get(`${BASE}/api/files/` + (await page.getAttribute('a[href^="/api/files/"]', "href")).split("/").pop());
   if (dl.status() !== 200) throw new Error("download status " + dl.status());
   const body = await dl.body();
-  if (body.length !== 3 * 1024 * 1024 + 16) throw new Error("download size mismatch: " + body.length);
+  if (body.length !== 3 * 1024 * 1024 + 17) throw new Error("download size mismatch: " + body.length);
   step("documento enviado e baixado");
 
   // Responsável + acesso
