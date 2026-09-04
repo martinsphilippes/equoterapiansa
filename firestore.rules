@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Toda leitura e escrita de dados passa pelo servidor (Firebase Admin SDK),
+// onde as permissões por perfil e por praticante são aplicadas em um único lugar.
+// O navegador nunca acessa o Firestore diretamente.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
