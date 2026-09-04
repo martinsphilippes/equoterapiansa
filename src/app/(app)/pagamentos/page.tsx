@@ -40,7 +40,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
             <tbody>
               {months.map((m) => (
                 <tr key={m.id}>
-                  <td className={tdCls}><Link href={`/pagamentos/${m.collaboratorId}/${competence}`} className="font-medium text-brand-800 hover:underline">{m.collaboratorName}</Link><span className="block text-xs text-ink-500">{m.payType === "hourly" ? "por hora" : "mensal"}</span></td>
+                  <td className={tdCls}><Link href={`/pagamentos/${m.collaboratorId}/${competence}`} className="font-medium text-primary-800 hover:underline">{m.collaboratorName}</Link><span className="block text-xs text-ink-500">{m.payType === "hourly" ? "por hora" : "mensal"}</span></td>
                   <td className={tdCls}>{minutesToHM(m.workedMinutes)} <span className="text-xs text-ink-500">/ {minutesToHM(m.expectedMinutes)}</span></td>
                   <td className={tdCls}>{m.absences}</td>
                   <td className={tdCls}>{formatBRL(m.calculatedAmount)}</td>

@@ -10,9 +10,9 @@ export function PermissionsEditor({ userId, role, current }: { userId: string; r
   const [open, setOpen] = useState(false);
   const [selRole, setSelRole] = useState<Role>(role);
   const [perms, setPerms] = useState<Set<Permission>>(new Set(current));
-  if (!open) return <button className="text-sm text-brand-700 hover:underline mt-1" onClick={() => setOpen(true)}>Ajustar perfil e permissões</button>;
+  if (!open) return <button className="text-sm text-primary-700 hover:underline mt-1" onClick={() => setOpen(true)}>Ajustar perfil e permissões</button>;
   return (
-    <ActionForm action={updateUserPermissions} className="mt-3 rounded-xl bg-sand-50 border border-ink-100 p-3 space-y-3" onSuccess={() => setOpen(false)}>
+    <ActionForm action={updateUserPermissions} className="mt-3 rounded-xl bg-surface-50 border border-border p-3 space-y-3" onSuccess={() => setOpen(false)}>
       <input type="hidden" name="userId" value={userId} />
       <div className="flex items-center gap-2">
         <Select name="role" value={selRole} className="max-w-xs h-9" onChange={(e) => { const r = e.target.value as Role; setSelRole(r); setPerms(new Set(DEFAULT_PERMISSIONS[r])); }}>

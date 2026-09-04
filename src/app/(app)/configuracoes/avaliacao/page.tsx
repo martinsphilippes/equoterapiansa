@@ -22,7 +22,7 @@ export default async function AssessmentSettingsPage() {
               {c.active ? <Badge tone="green">Ativa</Badge> : <Badge tone="gray">Inativa</Badge>}
               <ActionForm action={toggleAssessmentCategory}><input type="hidden" name="id" value={c.id} /><SubmitButton size="sm" variant="ghost" pendingText="…">{c.active ? "Desativar" : "Reativar"}</SubmitButton></ActionForm>
             </div>
-            <ul className="space-y-1.5 ml-3 border-l-2 border-ink-100 pl-3">
+            <ul className="space-y-1.5 ml-3 border-l-2 border-border pl-3">
               {c.items.map((it) => (
                 <li key={it.id}>
                   <ActionForm action={saveAssessmentItem} className="flex items-center gap-2">

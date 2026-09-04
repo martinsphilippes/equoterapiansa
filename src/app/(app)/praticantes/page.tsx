@@ -25,17 +25,17 @@ export default async function PractitionersPage({ searchParams }: { searchParams
       <form className="mb-3"><Input name="busca" placeholder="Buscar por nome…" defaultValue={search} /><input type="hidden" name="situacao" value={status} /></form>
       <div className="flex gap-2 mb-4 overflow-x-auto">
         {filters.map(([v, l]) => (
-          <Link key={v} href={`/praticantes?situacao=${v}${search ? `&busca=${encodeURIComponent(search)}` : ""}`} className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap ${status === v ? "bg-brand-600 text-white" : "bg-white border border-ink-100 text-ink-700"}`}>{l}</Link>
+          <Link key={v} href={`/praticantes?situacao=${v}${search ? `&busca=${encodeURIComponent(search)}` : ""}`} className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap ${status === v ? "bg-primary-600 text-white" : "bg-surface border border-border text-ink-700"}`}>{l}</Link>
         ))}
       </div>
       <Card className="p-0">
         {items.length === 0 ? (
           <EmptyState title="Nenhum praticante encontrado" description={user.role === "professional" ? "Você vê apenas os praticantes atribuídos a você." : undefined} action={canManage && <LinkButton href="/praticantes/novo" variant="secondary">Cadastrar praticante</LinkButton>} />
         ) : (
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-border">
             {items.map((p) => (
               <li key={p.id}>
-                <Link href={`/praticantes/${p.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-sand-50">
+                <Link href={`/praticantes/${p.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-surface-50">
                   <Avatar name={p.name} />
                   <div className="min-w-0 flex-1">
                     <p className="font-medium truncate">{p.name}</p>

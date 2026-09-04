@@ -27,7 +27,7 @@ export default async function CollaboratorAccessPage({ params }: { params: Param
             <div className="flex justify-between"><dt className="text-ink-500">Perfil</dt><dd>{ROLE_LABELS[account.role]}</dd></div>
             <div className="flex justify-between"><dt className="text-ink-500">Situação</dt><dd>{account.active ? <Badge tone="green">Ativo</Badge> : <Badge tone="red">Desativado</Badge>}</dd></div>
           </dl>
-          <p className="text-xs text-ink-500 mt-3">Para ajustar o perfil e as permissões detalhadas, use <Link href="/configuracoes/usuarios" className="text-brand-700 hover:underline">Configurações → Usuários</Link>.</p>
+          <p className="text-xs text-ink-500 mt-3">Para ajustar o perfil e as permissões detalhadas, use <Link href="/configuracoes/usuarios" className="text-primary-700 hover:underline">Configurações → Usuários</Link>.</p>
           <div className="flex flex-wrap gap-2 mt-4">
             <ActionForm action={resetUserPassword}>
               <input type="hidden" name="userId" value={account.id} />

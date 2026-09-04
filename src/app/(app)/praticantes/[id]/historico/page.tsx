@@ -32,7 +32,7 @@ export default async function HistoryPage({ params }: { params: Params<{ id: str
             <Field label="Descrição"><Textarea name="description" className="min-h-16" /></Field>
             <SubmitButton variant="outline">Adicionar</SubmitButton>
           </ActionForm>
-          <p className="text-xs text-ink-500 mt-3">Atendimentos, avaliações e relatórios entram automaticamente. <Link href={`/praticantes/${id}/atendimentos`} className="text-brand-700 hover:underline">Ver atendimentos</Link></p>
+          <p className="text-xs text-ink-500 mt-3">Atendimentos, avaliações e relatórios entram automaticamente. <Link href={`/praticantes/${id}/atendimentos`} className="text-primary-700 hover:underline">Ver atendimentos</Link></p>
         </Card>
       )}
     </div>

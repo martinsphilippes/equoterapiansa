@@ -68,7 +68,7 @@ export default async function PractitionerDataPage({ params }: { params: Params<
               <Field label="Motivo / observação"><Textarea name="note" className="min-h-16" /></Field>
               <SubmitButton variant="outline" size="sm">Salvar situação</SubmitButton>
             </ActionForm>
-            <div className="mt-4 pt-4 border-t border-ink-100">
+            <div className="mt-4 pt-4 border-t border-border">
               <LinkButton href={`/praticantes/${p.id}/encerrar`} variant="ghost" size="sm" className="text-red-700">Encerrar acompanhamento…</LinkButton>
             </div>
           </Card>

@@ -16,7 +16,7 @@ export default async function UsersPage() {
   return (
     <div className="space-y-5">
       <Card title="Equipe">
-        <ul className="divide-y divide-ink-100">
+        <ul className="divide-y divide-border">
           {staff.map((u) => (
             <li key={u.id} className="py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -43,7 +43,7 @@ export default async function UsersPage() {
       </Card>
       <Card title="Responsáveis com acesso">
         {guardians.length === 0 ? <p className="text-sm text-ink-500">Nenhum responsável com acesso ainda. Libere o acesso na ficha do responsável.</p> : (
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-border">
             {guardians.map((u) => (
               <li key={u.id} className="py-2.5 flex flex-wrap items-center justify-between gap-2">
                 <div><p className="font-medium">{u.name}</p><p className="text-sm text-ink-500">{u.email}</p></div>

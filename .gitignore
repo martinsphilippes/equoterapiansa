@@ -58,3 +58,4 @@ playwright-report/
 
 # capturas dos testes
 e2e/*.png
+e2e/.last-run.json

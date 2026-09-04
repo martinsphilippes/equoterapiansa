@@ -25,7 +25,7 @@ export default async function ReportsPage({ params }: { params: Params<{ id: str
       <div className="lg:col-span-2">
         <Card title="Relatórios gerados" className="p-0">
           {reports.length === 0 ? <EmptyState title="Nenhum relatório ainda" description="Gere um relatório de evolução a partir das avaliações e atendimentos registrados." /> : (
-            <ul className="divide-y divide-ink-100 -mt-5">
+            <ul className="divide-y divide-border -mt-5">
               {reports.map((r) => (
                 <li key={r.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-2">
                   <div>

@@ -24,7 +24,7 @@ export function SetupForm({ requiresSecret }: { requiresSecret: boolean }) {
   return (
     <form onSubmit={submit} className="space-y-4">
       {error && <Alert tone="error">{error}</Alert>}
-      <Field label="Nome da instituição"><Input name="orgName" placeholder="Ex.: Centro de Equoterapia Vida" /></Field>
+      <Field label="Nome da instituição"><Input name="orgName" defaultValue="Equoterapia Nossa Senhora Aparecida" /></Field>
       <Field label="Seu nome"><Input name="name" required /></Field>
       <Field label="E-mail"><Input name="email" type="email" required /></Field>
       <Field label="Senha" hint="Mínimo de 8 caracteres."><Input name="password" type="password" minLength={8} required /></Field>

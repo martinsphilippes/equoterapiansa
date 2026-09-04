@@ -28,10 +28,10 @@ export default async function TeamTimePage({ searchParams }: { searchParams: Sea
     <div className="space-y-5">
       <PageHeader title="Jornada da equipe" subtitle={`${weekdayLabel(date)}, ${isoToBR(date)} · ${present} presente${present === 1 ? "" : "s"} de ${rows.filter((r) => r.isWorking).length} previstos`} />
       <div className="flex items-center gap-2 no-print">
-        <Link href={`/jornada/equipe?data=${addDays(date, -1)}`} className="px-3 py-2 rounded-xl bg-white border border-ink-100">‹</Link>
+        <Link href={`/jornada/equipe?data=${addDays(date, -1)}`} className="px-3 py-2 rounded-xl bg-surface border border-border">‹</Link>
         <form className="flex-1"><Input type="date" name="data" defaultValue={date} onChange={undefined} className="max-w-xs" /></form>
-        <Link href={`/jornada/equipe?data=${addDays(date, 1)}`} className="px-3 py-2 rounded-xl bg-white border border-ink-100">›</Link>
-        <Link href="/jornada/equipe" className="text-sm text-brand-700">Hoje</Link>
+        <Link href={`/jornada/equipe?data=${addDays(date, 1)}`} className="px-3 py-2 rounded-xl bg-surface border border-border">›</Link>
+        <Link href="/jornada/equipe" className="text-sm text-primary-700">Hoje</Link>
       </div>
       <Card>
         <Table>

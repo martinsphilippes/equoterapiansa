@@ -1,32 +1,71 @@
 @import "tailwindcss";
+@import "@fontsource-variable/manrope";
 
+/*
+  Design system — Equoterapia Nossa Senhora Aparecida
+  Cores extraídas da logomarca oficial: azul institucional profundo (#0E1394 dominante,
+  #1420B4 como cor de ação) e branco. Superfícies claras com leve tom azulado.
+*/
 @theme {
-  --color-brand-50: #f1f7f3;
-  --color-brand-100: #dcebe1;
-  --color-brand-200: #b9d7c4;
-  --color-brand-300: #8dbba0;
-  --color-brand-400: #5f9a78;
-  --color-brand-500: #3f7d5c;
-  --color-brand-600: #2f6549;
-  --color-brand-700: #27513c;
-  --color-brand-800: #204131;
-  --color-brand-900: #1a3629;
+  /* Azul institucional (escala) */
+  --color-primary-50: #eef0fd;
+  --color-primary-100: #dce0fb;
+  --color-primary-200: #b8c0f7;
+  --color-primary-300: #8390f0;
+  --color-primary-400: #4a5ae8;
+  --color-primary-500: #2433d6;
+  --color-primary-600: #1420b4;
+  --color-primary-700: #0e1394;
+  --color-primary-800: #0a0e6e;
+  --color-primary-900: #05073f;
 
-  --color-sand-50: #fbf9f5;
-  --color-sand-100: #f5f0e7;
-  --color-sand-200: #e9dfcf;
-  --color-sand-300: #d8c8ae;
-  --color-sand-400: #c2a97f;
+  /* Tokens semânticos */
+  --color-primary: #1420b4;
+  --color-primary-dark: #0a0e6e;
+  --color-primary-light: #4a5ae8;
+  --color-primary-soft: #eef0fd;
+  --color-secondary: #2f8cff;
+  --color-secondary-soft: #e6f1ff;
 
-  --color-ink-900: #1f2a24;
-  --color-ink-700: #3d4a43;
-  --color-ink-500: #6b7770;
-  --color-ink-300: #a9b2ad;
-  --color-ink-100: #e6eae7;
+  --color-background: #f5f6fc;
+  --color-surface: #ffffff;
+  --color-surface-2: #eef0fa;
+  --color-border: #e2e6f3;
+  --color-text: #0e1230;
+  --color-text-2: #5b6280;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --radius-xl: 1rem;
+  /* Superfícies claras (substitui a escala anterior) */
+  --color-surface-50: #f5f6fc;
+  --color-surface-100: #eef0fa;
+  --color-surface-200: #e2e6f3;
+  --color-surface-300: #c9cfe6;
+  --color-surface-400: #a6aecb;
+
+  /* Texto e bordas (tinta azulada) */
+  --color-ink-900: #0e1230;
+  --color-ink-700: #2b3153;
+  --color-ink-500: #5b6280;
+  --color-ink-300: #a3a9c2;
+  --color-ink-100: #e2e6f3;
+
+  /* Semânticas de status (harmonizadas com o azul) */
+  --color-success: #159a6b;
+  --color-success-soft: #e3f6ee;
+  --color-warning: #c9840a;
+  --color-warning-soft: #fff4dc;
+  --color-danger: #d6383a;
+  --color-danger-soft: #fdeaea;
+  --color-info: #2433d6;
+  --color-info-soft: #eef0fd;
+
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --radius-xl: 0.9rem;
   --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+
+  --shadow-card: 0 1px 2px rgba(14, 18, 48, 0.04), 0 10px 30px -18px rgba(20, 32, 180, 0.18);
+  --shadow-float: 0 12px 40px -12px rgba(10, 14, 110, 0.35);
 }
 
 :root {
@@ -35,19 +74,70 @@
 
 html {
   -webkit-tap-highlight-color: transparent;
+  font-feature-settings: "cv11", "ss01";
 }
 
 body {
-  background: var(--color-sand-50);
-  color: var(--color-ink-900);
+  background: var(--color-background);
+  color: var(--color-text);
   font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
-@media print {
-  .no-print { display: none !important; }
-  body { background: white; }
+h1, h2, h3 {
+  letter-spacing: -0.01em;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Gradiente institucional (login, cabeçalhos, área da família) */
+.brand-gradient {
+  background: linear-gradient(135deg, var(--color-primary-800) 0%, var(--color-primary-600) 55%, var(--color-primary-500) 100%);
+}
+.brand-glow {
+  background-image: url("/brand/glow.jpg");
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+
+/* Marca d'água do símbolo (estados vazios, heróis) */
+.brand-watermark {
+  background-image: url("/brand/symbol-white.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: right bottom;
+}
+
+/* Animações discretas */
+@keyframes brand-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1); }
+}
+.animate-brand-pulse { animation: brand-pulse 1.6s ease-in-out infinite; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise 0.35s ease-out both; }
+
+/* Foco acessível */
+:focus-visible {
+  outline: 2px solid var(--color-primary-400);
+  outline-offset: 2px;
 }
 
 input[type="date"], input[type="time"] {
   min-height: 2.75rem;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; font-size: 12.5px; }
+  @page { margin: 16mm 14mm; }
 }

@@ -39,7 +39,7 @@ export function DocumentList({ docs, status, canDelete }: { docs: StoredDocument
               return (
                 <tr key={d.id}>
                   <td className={tdCls}><span className="font-medium">{d.typeName}</span>{d.notes && <span className="block text-xs text-ink-500">{d.notes}</span>}</td>
-                  <td className={tdCls}><a className="text-brand-700 hover:underline break-all" href={`/api/files/${d.id}`} target="_blank" rel="noreferrer">{d.fileName}</a><span className="block text-xs text-ink-500">{formatBytes(d.size)}</span></td>
+                  <td className={tdCls}><a className="text-primary-700 hover:underline break-all" href={`/api/files/${d.id}`} target="_blank" rel="noreferrer">{d.fileName}</a><span className="block text-xs text-ink-500">{formatBytes(d.size)}</span></td>
                   <td className={tdCls}>{d.expiresAt ? <span className={expired ? "text-red-700 font-medium" : ""}>{isoToBR(d.expiresAt)}{expired ? " (vencido)" : ""}</span> : "—"}</td>
                   <td className={tdCls}><span className="text-xs text-ink-500">{new Date(d.uploadedAt).toLocaleDateString("pt-BR")}<br />{d.uploadedByName}</span></td>
                   <td className={tdCls}>

@@ -16,7 +16,7 @@ export function ScheduleFields({ schedule, name = "customSchedule", toggle = tru
     <div className="space-y-3">
       {toggle && <Checkbox name={name} label="Usar jornada própria (diferente da padrão)" checked={on} onChange={(e) => setOn(e.target.checked)} />}
       {(on || !toggle) && (
-        <div className="rounded-xl bg-sand-50 border border-ink-100 p-3 space-y-3">
+        <div className="rounded-xl bg-surface-50 border border-border p-3 space-y-3">
           <div>
             <p className="text-sm font-medium text-ink-700 mb-1">Dias da semana</p>
             <div className="flex flex-wrap gap-3">

@@ -67,7 +67,7 @@ export function DocumentUploader({ ownerType, ownerId, types, register }: { owne
   if (!open) return <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>+ Enviar documento</Button>;
 
   return (
-    <form ref={formRef} onSubmit={submit} className="rounded-xl border border-ink-100 bg-sand-50 p-4 space-y-3">
+    <form ref={formRef} onSubmit={submit} className="rounded-xl border border-border bg-surface-50 p-4 space-y-3">
       {error && <Alert tone="error">{error}</Alert>}
       <Field label="Tipo de documento">
         <Select name="typeId" value={typeId} onChange={(e) => setTypeId(e.target.value)} required>
@@ -110,7 +110,7 @@ export function PhotoUploader({ ownerId, save }: { ownerId: string; save: Regist
     }
   }
   return (
-    <label className="text-xs text-brand-700 cursor-pointer hover:underline">
+    <label className="text-xs text-primary-700 cursor-pointer hover:underline">
       {busy ? "Enviando…" : "Alterar foto"}
       <input type="file" accept="image/*" className="hidden" onChange={onChange} disabled={busy} />
       {error && <span className="block text-red-700">{error}</span>}

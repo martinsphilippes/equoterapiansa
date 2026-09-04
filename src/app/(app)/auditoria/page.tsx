@@ -24,7 +24,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Search
       <form className="flex flex-wrap gap-2 mb-4">
         <Select name="entidade" defaultValue={entity} className="max-w-xs">{Object.entries(ENTITIES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</Select>
         <Input name="busca" defaultValue={q} placeholder="Buscar por usuário, ação ou nome…" className="max-w-sm" />
-        <button className="h-11 px-4 rounded-xl bg-brand-600 text-white text-sm font-medium">Filtrar</button>
+        <button className="h-11 px-4 rounded-xl bg-primary-600 text-white text-sm font-medium">Filtrar</button>
       </form>
       <Card>
         {filtered.length === 0 ? <EmptyState title="Nenhum registro" /> : (
@@ -37,7 +37,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Search
                   <td className={tdCls}>{l.userName}</td>
                   <td className={`${tdCls} font-mono text-xs`}>{l.action}</td>
                   <td className={tdCls}><span className="text-xs text-ink-500">{ENTITIES[l.entity] ?? l.entity}</span><br />{l.entityLabel ?? l.entityId}</td>
-                  <td className={tdCls}>{l.details && Object.keys(l.details).length > 0 && <details><summary className="text-xs text-brand-700 cursor-pointer">ver</summary><pre className="text-[11px] whitespace-pre-wrap break-all max-w-md text-ink-700">{JSON.stringify(l.details, null, 1)}</pre></details>}</td>
+                  <td className={tdCls}>{l.details && Object.keys(l.details).length > 0 && <details><summary className="text-xs text-primary-700 cursor-pointer">ver</summary><pre className="text-[11px] whitespace-pre-wrap break-all max-w-md text-ink-700">{JSON.stringify(l.details, null, 1)}</pre></details>}</td>
                 </tr>
               ))}
             </tbody>

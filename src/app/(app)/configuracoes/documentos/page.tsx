@@ -9,7 +9,7 @@ import type { DocumentType } from "@/lib/db/types";
 function TypeList({ title, types }: { title: string; types: DocumentType[] }) {
   return (
     <Card title={title}>
-      <ul className="divide-y divide-ink-100">
+      <ul className="divide-y divide-border">
         {types.map((t) => (
           <li key={t.id} className="py-2.5">
             <ActionForm action={saveDocumentType} className="space-y-2">

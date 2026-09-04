@@ -31,8 +31,8 @@ export function SessionForm({ appointment, session, practitionerId, practitioner
         <p className="text-sm text-ink-500">Praticante</p>
         <p className="text-lg font-semibold">{practitionerName}</p>
         <div className="grid grid-cols-2 gap-3 mt-4">
-          <button type="button" onClick={() => setAttended(true)} className={cn("h-14 rounded-xl font-semibold text-base border-2", attended ? "bg-brand-600 border-brand-600 text-white" : "bg-white border-ink-100 text-ink-700")}>Presente</button>
-          <button type="button" onClick={() => setAttended(false)} className={cn("h-14 rounded-xl font-semibold text-base border-2", !attended ? "bg-red-600 border-red-600 text-white" : "bg-white border-ink-100 text-ink-700")}>Faltou</button>
+          <button type="button" onClick={() => setAttended(true)} className={cn("h-14 rounded-xl font-semibold text-base border-2", attended ? "bg-primary-600 border-primary-600 text-white" : "bg-surface border-border text-ink-700")}>Presente</button>
+          <button type="button" onClick={() => setAttended(false)} className={cn("h-14 rounded-xl font-semibold text-base border-2", !attended ? "bg-red-600 border-red-600 text-white" : "bg-surface border-border text-ink-700")}>Faltou</button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
           <Field label="Data"><Input type="date" name="date" defaultValue={session?.date ?? appointment?.date ?? today} required /></Field>
@@ -52,7 +52,7 @@ export function SessionForm({ appointment, session, practitionerId, practitioner
             {QUICK_ACTIVITIES.map((a) => {
               const on = activities.has(a);
               return (
-                <button key={a} type="button" onClick={() => { const n = new Set(activities); if (on) n.delete(a); else n.add(a); setActivities(n); }} className={cn("px-3 py-2 rounded-full text-sm border", on ? "bg-brand-100 border-brand-300 text-brand-900" : "bg-white border-ink-100 text-ink-700")}>{on ? "✓ " : ""}{a}</button>
+                <button key={a} type="button" onClick={() => { const n = new Set(activities); if (on) n.delete(a); else n.add(a); setActivities(n); }} className={cn("px-3 py-2 rounded-full text-sm border", on ? "bg-primary-100 border-primary-300 text-primary-900" : "bg-surface border-border text-ink-700")}>{on ? "✓ " : ""}{a}</button>
               );
             })}
           </div>

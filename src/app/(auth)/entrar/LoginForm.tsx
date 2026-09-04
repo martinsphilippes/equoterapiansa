@@ -56,7 +56,7 @@ export function LoginForm({ next }: { next?: string }) {
         <Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
       </Field>
       <Button type="submit" size="lg" className="w-full" disabled={loading}>{loading ? "Entrando…" : "Entrar"}</Button>
-      <button type="button" onClick={forgot} className="w-full text-sm text-brand-700 hover:underline">Esqueci minha senha</button>
+      <button type="button" onClick={forgot} className="w-full text-sm text-primary-700 hover:underline">Esqueci minha senha</button>
     </form>
   );
 }

@@ -17,12 +17,12 @@ export default async function PayrollMonthPage({ params }: { params: Params<{ co
   if (!m) notFound();
   return (
     <div className="space-y-5">
-      <PageHeader back="/pagamentos" title={`${m.collaboratorName} — ${competenceLabel(competence).toUpperCase()}`} subtitle={<Link href={`/colaboradores/${collaboratorId}/jornada?mes=${competence}`} className="text-brand-700 hover:underline">Ver registros de jornada do mês</Link>} />
+      <PageHeader back="/pagamentos" title={`${m.collaboratorName} — ${competenceLabel(competence).toUpperCase()}`} subtitle={<Link href={`/colaboradores/${collaboratorId}/jornada?mes=${competence}`} className="text-primary-700 hover:underline">Ver registros de jornada do mês</Link>} />
       <MonthNavCompetence collaboratorId={collaboratorId} competence={competence} />
       <PayrollSheet m={m} canManage={hasPermission(user, "payments.manage")} today={todayISO(settings.timezone)} />
       <Card title="Histórico de pagamentos">
         {history.length === 0 ? <p className="text-sm text-ink-500">Nenhum mês fechado ainda.</p> : (
-          <ul className="divide-y divide-ink-100">
+          <ul className="divide-y divide-border">
             {history.map((h) => (
               <li key={h.id} className="flex items-center justify-between py-2 text-sm">
                 <Link href={`/pagamentos/${collaboratorId}/${h.competence}`} className="font-medium hover:underline">{competenceLabel(h.competence)}</Link>
@@ -46,10 +46,10 @@ function MonthNavCompetence({ collaboratorId, competence }: { collaboratorId: st
 import { addMonths } from "@/lib/domain/dates";
 function MonthNavLinks({ collaboratorId, competence }: { collaboratorId: string; competence: string }) {
   return (
-    <div className="flex items-center justify-between gap-2 rounded-xl bg-white border border-ink-100 px-2 py-1.5 no-print">
-      <Link href={`/pagamentos/${collaboratorId}/${addMonths(competence, -1)}`} className="px-3 py-1 rounded-lg hover:bg-sand-100">‹</Link>
+    <div className="flex items-center justify-between gap-2 rounded-xl bg-surface border border-border px-2 py-1.5 no-print">
+      <Link href={`/pagamentos/${collaboratorId}/${addMonths(competence, -1)}`} className="px-3 py-1 rounded-lg hover:bg-surface-100">‹</Link>
       <span className="font-medium">{competenceLabel(competence)}</span>
-      <Link href={`/pagamentos/${collaboratorId}/${addMonths(competence, 1)}`} className="px-3 py-1 rounded-lg hover:bg-sand-100">›</Link>
+      <Link href={`/pagamentos/${collaboratorId}/${addMonths(competence, 1)}`} className="px-3 py-1 rounded-lg hover:bg-surface-100">›</Link>
     </div>
   );
 }

@@ -19,7 +19,7 @@ export function ClockCard({ today, entry, todayLabel }: { today: string; entry: 
       <p className="text-sm text-ink-500">{todayLabel}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {entry?.periods.map((p, i) => (
-          <span key={i} className="rounded-lg bg-sand-100 px-2.5 py-1 text-sm">{p.in} → {p.out ?? "…"}</span>
+          <span key={i} className="rounded-lg bg-surface-100 px-2.5 py-1 text-sm">{p.in} → {p.out ?? "…"}</span>
         ))}
         {!entry?.periods.length && <span className="text-sm text-ink-300">Nenhum registro hoje</span>}
       </div>

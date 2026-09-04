@@ -13,10 +13,10 @@ export function TeamDayEditor({ collaboratorId, date, entry, name, status, perio
         <td className={tdCls}>{status}</td>
         <td className={tdCls}>{periods}</td>
         <td className={tdCls}>{total}</td>
-        <td className={tdCls}><button className="text-sm text-brand-700 hover:underline" onClick={() => setOpen(!open)}>{open ? "Fechar" : entry ? "Corrigir" : "Registrar"}</button></td>
+        <td className={tdCls}><button className="text-sm text-primary-700 hover:underline" onClick={() => setOpen(!open)}>{open ? "Fechar" : entry ? "Corrigir" : "Registrar"}</button></td>
       </tr>
       {open && (
-        <tr><td colSpan={5} className="border-t border-ink-100 bg-sand-50 p-4"><div className="max-w-md"><TimeEntryForm collaboratorId={collaboratorId} date={date} entry={entry} isManager onClose={() => setOpen(false)} compact /></div></td></tr>
+        <tr><td colSpan={5} className="border-t border-border bg-surface-50 p-4"><div className="max-w-md"><TimeEntryForm collaboratorId={collaboratorId} date={date} entry={entry} isManager onClose={() => setOpen(false)} compact /></div></td></tr>
       )}
     </>
   );

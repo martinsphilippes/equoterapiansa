@@ -17,17 +17,17 @@ export function PayrollSheet({ m, canManage, today }: { m: PayrollMonth; canMana
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       <div className="lg:col-span-2 space-y-5">
         <Card title="Apuração">
-          <dl className="divide-y divide-ink-100 text-sm">
+          <dl className="divide-y divide-border text-sm">
             <Row k={m.payType === "hourly" ? "Valor por hora cadastrado" : "Salário cadastrado"} v={formatBRL(m.payType === "hourly" ? m.hourlyRate : m.salary)} />
             <Row k="Horas previstas" v={minutesToHM(m.expectedMinutes)} />
             <Row k="Horas registradas" v={minutesToHM(m.workedMinutes)} />
-            <Row k="Diferença" v={<span className={m.workedMinutes - m.expectedMinutes < 0 ? "text-amber-700" : "text-brand-700"}>{m.workedMinutes - m.expectedMinutes >= 0 ? "+" : ""}{minutesToHM(m.workedMinutes - m.expectedMinutes)}</span>} />
+            <Row k="Diferença" v={<span className={m.workedMinutes - m.expectedMinutes < 0 ? "text-amber-700" : "text-primary-700"}>{m.workedMinutes - m.expectedMinutes >= 0 ? "+" : ""}{minutesToHM(m.workedMinutes - m.expectedMinutes)}</span>} />
             <Row k="Faltas" v={m.absences} />
             <Row k="Atrasos / saídas antecipadas" v={`${m.lateCount} / ${m.earlyLeaveCount}`} />
             <Row k="Valor/hora de referência" v={formatBRL(m.referenceHourlyRate)} hint={m.payType === "monthly" ? "salário ÷ horas previstas" : undefined} />
             <Row k="Valor base" v={formatBRL(m.baseAmount)} hint={m.payType === "hourly" ? `${hoursWorked.toFixed(2).replace(".", ",")}h × ${formatBRL(m.hourlyRate)}` : "salário mensal"} />
             {m.payType === "monthly" && <Row k="Simulação proporcional às horas" v={formatBRL(Math.round(m.referenceHourlyRate * hoursWorked * 100) / 100)} hint="apenas referência; não é aplicada automaticamente" />}
-            {m.adjustments.map((a) => <Row key={a.id} k={`Ajuste: ${a.description}`} v={<span className={a.amount < 0 ? "text-red-700" : "text-brand-700"}>{a.amount >= 0 ? "+" : ""}{formatBRL(a.amount)}</span>} />)}
+            {m.adjustments.map((a) => <Row key={a.id} k={`Ajuste: ${a.description}`} v={<span className={a.amount < 0 ? "text-red-700" : "text-primary-700"}>{a.amount >= 0 ? "+" : ""}{formatBRL(a.amount)}</span>} />)}
             <Row k={<strong>Valor calculado</strong>} v={<strong className="text-lg">{formatBRL(m.calculatedAmount)}</strong>} />
           </dl>
         </Card>

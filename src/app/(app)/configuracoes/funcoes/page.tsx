@@ -11,7 +11,7 @@ export default async function JobRolesPage() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <Card title="Funções cadastradas">
-        <ul className="divide-y divide-ink-100">
+        <ul className="divide-y divide-border">
           {roles.map((r) => (
             <li key={r.id} className="py-2.5">
               <ActionForm action={saveJobRole} className="flex flex-wrap items-center gap-2">

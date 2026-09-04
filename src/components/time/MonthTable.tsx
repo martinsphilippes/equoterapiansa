@@ -30,7 +30,7 @@ export function MonthTable({ collaboratorId, days, entries, isManager, today, ed
           const isEditing = editing === date;
           return (
             <Fragment key={date}>
-              <tr className={date === today ? "bg-brand-50/60" : !isWorking ? "text-ink-300" : ""}>
+              <tr className={date === today ? "bg-primary-50/60" : !isWorking ? "text-ink-300" : ""}>
                 <td className={tdCls}><span className="font-medium">{isoToBR(date).slice(0, 5)}</span> <span className="text-xs">{weekdayLabel(date, true)}</span></td>
                 <td className={tdCls}><DayStatus entry={e} isWorking={isWorking} isPast={date < today} /></td>
                 <td className={tdCls}>{e?.periods.map((p, i) => <span key={i} className="inline-block mr-2 whitespace-nowrap">{p.in}→{p.out ?? "…"}</span>)}{e?.breakMinutes ? <span className="text-xs text-ink-500">(−{e.breakMinutes}min)</span> : null}</td>
@@ -40,10 +40,10 @@ export function MonthTable({ collaboratorId, days, entries, isManager, today, ed
                   {e?.earlyLeaveMinutes ? <Badge tone="amber" className="ml-1">−{e.earlyLeaveMinutes}min</Badge> : null}
                   {(e?.justification || e?.managerNote) && <span className="block text-xs text-ink-500 mt-1">{e.justification}{e.managerNote ? ` · Gestor: ${e.managerNote}` : ""}</span>}
                 </td>
-                <td className={tdCls}>{canEdit && <button className="text-sm text-brand-700 hover:underline" onClick={() => setEditing(isEditing ? null : date)}>{isEditing ? "Fechar" : e ? "Editar" : "Registrar"}</button>}</td>
+                <td className={tdCls}>{canEdit && <button className="text-sm text-primary-700 hover:underline" onClick={() => setEditing(isEditing ? null : date)}>{isEditing ? "Fechar" : e ? "Editar" : "Registrar"}</button>}</td>
               </tr>
               {isEditing && (
-                <tr><td colSpan={6} className="border-t border-ink-100 bg-sand-50 p-4">
+                <tr><td colSpan={6} className="border-t border-border bg-surface-50 p-4">
                   <div className="max-w-md"><TimeEntryForm collaboratorId={collaboratorId} date={date} entry={e} isManager={isManager} onClose={() => setEditing(null)} /></div>
                 </td></tr>
               )}

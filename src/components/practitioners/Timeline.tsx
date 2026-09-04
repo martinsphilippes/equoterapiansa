@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { isoToBR } from "@/lib/domain/dates";
 
-const dot = { green: "bg-brand-500", blue: "bg-sky-500", amber: "bg-amber-500", gray: "bg-ink-300", red: "bg-red-500" };
+const dot = { green: "bg-primary-500", blue: "bg-sky-500", amber: "bg-amber-500", gray: "bg-ink-300", red: "bg-red-500" };
 
 export function Timeline({ items }: { items: { date: string; kind: string; title: string; description?: string; href?: string; tone: keyof typeof dot }[] }) {
   return (
-    <ol className="relative border-l-2 border-ink-100 ml-2 space-y-4">
+    <ol className="relative border-l-2 border-border ml-2 space-y-4">
       {items.map((it, i) => (
         <li key={i} className="pl-5">
           <span className={`absolute -left-[7px] mt-1.5 h-3 w-3 rounded-full ${dot[it.tone]}`} />

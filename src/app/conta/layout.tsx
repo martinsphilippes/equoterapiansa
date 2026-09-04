@@ -8,7 +8,7 @@ export default async function AccountLayout({ children }: { children: ReactNode 
   const [user, settings] = await Promise.all([requireUser(), getSettings()]);
   const isGuardian = user.role === "guardian";
   const nav = isGuardian
-    ? [{ href: "/familia", label: "Início", icon: "home" }, { href: "/familia/comunicados", label: "Comunicados", icon: "megaphone" }, { href: "/conta", label: "Conta", icon: "settings" }]
+    ? [{ href: "/familia", label: "Início", icon: "home" }, { href: "/familia/comunicados", label: "Avisos", icon: "megaphone" }, { href: "/conta", label: "Conta", icon: "settings" }]
     : buildNav(user);
   return <AppShell user={user} nav={nav} orgName={settings.orgName} homeHref={isGuardian ? "/familia" : "/painel"}>{children}</AppShell>;
 }

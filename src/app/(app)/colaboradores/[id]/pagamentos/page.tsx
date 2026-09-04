@@ -15,7 +15,7 @@ export default async function CollaboratorPaymentsPage({ params }: { params: Par
   return (
     <Card title="Histórico por competência" action={<LinkButton href={`/pagamentos/${id}/${current}`} size="sm" variant="secondary">Abrir mês atual</LinkButton>}>
       {history.length === 0 ? <p className="text-sm text-ink-500">Nenhum mês fechado ainda. Abra o mês atual para ver a apuração.</p> : (
-        <ul className="divide-y divide-ink-100">
+        <ul className="divide-y divide-border">
           {history.map((h) => (
             <li key={h.id} className="flex items-center justify-between py-2.5 text-sm">
               <Link href={`/pagamentos/${id}/${h.competence}`} className="font-medium hover:underline">{competenceLabel(h.competence)}</Link>

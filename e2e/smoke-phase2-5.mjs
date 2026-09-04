@@ -225,8 +225,10 @@ ctx3.setDefaultTimeout(120000);
   await p3.goto(BASE + "/praticantes");
   await p3.waitForSelector(`text=João Silva ${RUN}`);
   if (await p3.$(`text=Outro Praticante ${RUN}`)) throw new Error("professional sees unassigned practitioner");
+  // com streaming (loading.tsx) o status HTTP pode ser 200; o que importa é o conteúdo não vazar
   const r = await p3.request.get(`${BASE}/praticantes/${outroId}`);
-  if (r.status() !== 404) throw new Error("professional reached unassigned practitioner: " + r.status());
+  const html = await r.text();
+  if (html.includes(`Outro Praticante ${RUN}`) || html.includes("Responsáveis")) throw new Error("professional reached unassigned practitioner: " + r.status());
   await p3.goto(BASE + "/colaboradores");
   await p3.waitForURL(/sem-permissao/);
   await p3.screenshot({ path: "e2e/shot-profissional.png", fullPage: true });
@@ -244,6 +246,7 @@ ctx3.setDefaultTimeout(120000);
   await page.waitForSelector("text=Ver relatório final");
   step("encerramento com relatório final");
 
+  writeFileSync("e2e/.last-run.json", JSON.stringify({ familyEmail: `maria.${RUN}@teste.com`, familyPass: "maria123456", joaoId }));
   console.log("PHASE2-5 OK");
 } catch (e) {
   console.log("FAIL", e.message);

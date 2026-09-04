@@ -13,7 +13,7 @@ export const DEFAULT_SCALE = [
 ];
 
 export const DEFAULT_SETTINGS: Settings = {
-  orgName: "Equoterapia",
+  orgName: "Equoterapia Nossa Senhora Aparecida",
   timezone: DEFAULT_TZ,
   schedule: DEFAULT_SCHEDULE,
   lateToleranceMinutes: 5,

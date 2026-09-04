@@ -9,7 +9,7 @@ export function LogoutButton({ className = "" }: { className?: string }) {
     window.location.href = "/entrar";
   }
   return (
-    <button onClick={logout} className={`inline-flex items-center gap-2 text-sm text-ink-500 hover:text-ink-900 ${className}`}>
+    <button onClick={logout} className={`inline-flex items-center gap-2 text-sm font-medium text-ink-500 hover:text-danger ${className}`}>
       <LogOut className="h-4 w-4" /> Sair
     </button>
   );

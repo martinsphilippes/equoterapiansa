@@ -7,11 +7,11 @@ export function cn(...parts: (string | false | null | undefined)[]) {
 
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "outline";
 const variants: Record<Variant, string> = {
-  primary: "bg-brand-600 text-white hover:bg-brand-700 shadow-sm",
-  secondary: "bg-brand-100 text-brand-800 hover:bg-brand-200",
-  outline: "border border-ink-100 bg-white text-ink-900 hover:bg-sand-100",
-  ghost: "text-ink-700 hover:bg-sand-100",
-  danger: "bg-red-600 text-white hover:bg-red-700",
+  primary: "bg-primary text-white hover:bg-primary-700 active:bg-primary-800 shadow-[0_6px_16px_-8px_rgba(20,32,180,0.6)]",
+  secondary: "bg-primary-soft text-primary-700 hover:bg-primary-100",
+  outline: "border border-border bg-surface text-ink-900 hover:bg-surface-100",
+  ghost: "text-ink-700 hover:bg-surface-100",
+  danger: "bg-danger text-white hover:brightness-95",
 };
 const sizes = { sm: "h-9 px-3 text-sm", md: "h-11 px-4 text-sm", lg: "h-12 px-5 text-base" };
 
@@ -20,7 +20,7 @@ export function Button({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: keyof typeof sizes }) {
   return (
     <button
-      className={cn("inline-flex items-center justify-center gap-2 rounded-xl font-medium transition disabled:opacity-50 disabled:cursor-not-allowed", variants[variant], sizes[size], className)}
+      className={cn("inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed", variants[variant], sizes[size], className)}
       {...rest}
     >
       {children}
@@ -32,7 +32,7 @@ export function LinkButton({
   href, variant = "primary", size = "md", className, children,
 }: { href: string; variant?: Variant; size?: keyof typeof sizes; className?: string; children: ReactNode }) {
   return (
-    <Link href={href as never} className={cn("inline-flex items-center justify-center gap-2 rounded-xl font-medium transition", variants[variant], sizes[size], className)}>
+    <Link href={href as never} className={cn("inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition", variants[variant], sizes[size], className)}>
       {children}
     </Link>
   );
@@ -40,10 +40,10 @@ export function LinkButton({
 
 export function Card({ children, className, title, action }: { children: ReactNode; className?: string; title?: ReactNode; action?: ReactNode }) {
   return (
-    <section className={cn("rounded-2xl bg-white border border-ink-100 shadow-[0_1px_2px_rgba(0,0,0,0.03)]", className)}>
+    <section className={cn("rounded-2xl bg-surface border border-border shadow-card", className)}>
       {(title || action) && (
         <header className="flex items-center justify-between gap-3 px-5 pt-4">
-          {title && <h2 className="text-base font-semibold text-ink-900">{title}</h2>}
+          {title && <h2 className="text-[15px] font-bold text-ink-900">{title}</h2>}
           {action}
         </header>
       )}
@@ -54,12 +54,12 @@ export function Card({ children, className, title, action }: { children: ReactNo
 
 export function PageHeader({ title, subtitle, back, actions }: { title: ReactNode; subtitle?: ReactNode; back?: string; actions?: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+    <div className="flex flex-wrap items-start justify-between gap-3 mb-5 animate-rise">
       <div className="min-w-0">
         {back && (
-          <Link href={back as never} className="text-sm text-brand-700 hover:underline">← Voltar</Link>
+          <Link href={back as never} className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-800 mb-1">← Voltar</Link>
         )}
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900 truncate">{title}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-ink-900 truncate">{title}</h1>
         {subtitle && <p className="text-sm text-ink-500 mt-0.5">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2 no-print">{actions}</div>}
@@ -68,27 +68,27 @@ export function PageHeader({ title, subtitle, back, actions }: { title: ReactNod
 }
 
 const badgeTones = {
-  green: "bg-brand-100 text-brand-800",
-  gray: "bg-ink-100 text-ink-700",
-  amber: "bg-amber-100 text-amber-800",
-  red: "bg-red-100 text-red-800",
-  blue: "bg-sky-100 text-sky-800",
+  green: "bg-success-soft text-success",
+  gray: "bg-surface-100 text-ink-700",
+  amber: "bg-warning-soft text-warning",
+  red: "bg-danger-soft text-danger",
+  blue: "bg-primary-soft text-primary-700",
 };
 export function Badge({ children, tone = "gray", className }: { children: ReactNode; tone?: keyof typeof badgeTones; className?: string }) {
-  return <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap", badgeTones[tone], className)}>{children}</span>;
+  return <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap", badgeTones[tone], className)}>{children}</span>;
 }
 
 export function Field({ label, children, hint, className }: { label: ReactNode; children: ReactNode; hint?: ReactNode; className?: string }) {
   return (
     <label className={cn("block", className)}>
-      <span className="block text-sm font-medium text-ink-700 mb-1">{label}</span>
+      <span className="block text-sm font-semibold text-ink-700 mb-1">{label}</span>
       {children}
       {hint && <span className="block text-xs text-ink-500 mt-1">{hint}</span>}
     </label>
   );
 }
 
-const inputBase = "w-full rounded-xl border border-ink-100 bg-white px-3.5 h-11 text-base text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-400 disabled:bg-sand-100";
+const inputBase = "w-full rounded-xl border border-border bg-surface px-3.5 h-11 text-base text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 disabled:bg-surface-100 transition";
 export function Input({ className, ...rest }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(inputBase, className)} {...rest} />;
 }
@@ -101,7 +101,7 @@ export function Textarea({ className, ...rest }: TextareaHTMLAttributes<HTMLText
 export function Checkbox({ label, className, ...rest }: InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
   return (
     <label className={cn("inline-flex items-center gap-2 text-sm text-ink-700 cursor-pointer", className)}>
-      <input type="checkbox" className="h-5 w-5 rounded border-ink-300 text-brand-600 focus:ring-brand-300" {...rest} />
+      <input type="checkbox" className="h-5 w-5 rounded border-surface-300 accent-primary focus:ring-primary-300" {...rest} />
       {label}
     </label>
   );
@@ -110,19 +110,23 @@ export function Checkbox({ label, className, ...rest }: InputHTMLAttributes<HTML
 export function EmptyState({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return (
     <div className="text-center py-10 px-4">
-      <p className="font-medium text-ink-900">{title}</p>
-      {description && <p className="text-sm text-ink-500 mt-1">{description}</p>}
+      <div className="mx-auto mb-3 h-12 w-16 opacity-25 bg-[url('/brand/symbol-blue.png')] bg-contain bg-no-repeat bg-center" aria-hidden />
+      <p className="font-semibold text-ink-900">{title}</p>
+      {description && <p className="text-sm text-ink-500 mt-1 max-w-sm mx-auto">{description}</p>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}
     </div>
   );
 }
 
-export function Stat({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: ReactNode; tone?: "green" | "red" | "amber" | "default" }) {
-  const color = tone === "green" ? "text-brand-700" : tone === "red" ? "text-red-700" : tone === "amber" ? "text-amber-700" : "text-ink-900";
+export function Stat({ label, value, hint, tone, icon }: { label: string; value: ReactNode; hint?: ReactNode; tone?: "green" | "red" | "amber" | "default" | "primary"; icon?: ReactNode }) {
+  const color = { green: "text-success", red: "text-danger", amber: "text-warning", primary: "text-primary-700", default: "text-ink-900" }[tone ?? "default"];
   return (
-    <div className="rounded-2xl bg-white border border-ink-100 p-4">
-      <p className="text-xs uppercase tracking-wide text-ink-500">{label}</p>
-      <p className={cn("text-2xl font-semibold mt-1", color)}>{value}</p>
+    <div className="rounded-2xl bg-surface border border-border shadow-card p-4 h-full">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">{label}</p>
+        {icon && <span className="h-8 w-8 rounded-lg bg-primary-soft text-primary-600 flex items-center justify-center shrink-0 -mt-1">{icon}</span>}
+      </div>
+      <p className={cn("text-[26px] leading-tight font-extrabold mt-1 tnum", color)}>{value}</p>
       {hint && <p className="text-xs text-ink-500 mt-1">{hint}</p>}
     </div>
   );
@@ -130,28 +134,28 @@ export function Stat({ label, value, hint, tone }: { label: string; value: React
 
 export function Alert({ children, tone = "info" }: { children: ReactNode; tone?: "info" | "error" | "success" | "warning" }) {
   const t = {
-    info: "bg-sky-50 text-sky-900 border-sky-100",
-    error: "bg-red-50 text-red-900 border-red-100",
-    success: "bg-brand-50 text-brand-900 border-brand-100",
-    warning: "bg-amber-50 text-amber-900 border-amber-100",
+    info: "bg-info-soft text-primary-800 border-primary-100",
+    error: "bg-danger-soft text-danger border-red-100",
+    success: "bg-success-soft text-success border-emerald-100",
+    warning: "bg-warning-soft text-warning border-amber-100",
   }[tone];
-  return <div className={cn("rounded-xl border px-4 py-3 text-sm", t)}>{children}</div>;
+  return <div className={cn("rounded-xl border px-4 py-3 text-sm font-medium", t)}>{children}</div>;
 }
 
 export function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {
   const s = { sm: "h-8 w-8 text-xs", md: "h-10 w-10 text-sm", lg: "h-16 w-16 text-xl" }[size];
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("");
-  return <div className={cn("rounded-full bg-brand-100 text-brand-800 font-semibold flex items-center justify-center shrink-0", s)}>{initials}</div>;
+  return <div className={cn("rounded-full bg-primary-soft text-primary-700 font-bold flex items-center justify-center shrink-0", s)}>{initials}</div>;
 }
 
 export function Tabs({ tabs, current }: { tabs: { href: string; label: string }[]; current: string }) {
   return (
-    <nav className="flex gap-1 overflow-x-auto no-print -mx-1 px-1 pb-1 mb-4 border-b border-ink-100">
+    <nav className="flex gap-1 overflow-x-auto no-print -mx-1 px-1 pb-1 mb-4 border-b border-border">
       {tabs.map((t) => {
         const active = current === t.href;
         return (
           <Link key={t.href} href={t.href as never}
-            className={cn("whitespace-nowrap px-3 py-2 text-sm font-medium rounded-t-lg border-b-2 -mb-px", active ? "border-brand-600 text-brand-800" : "border-transparent text-ink-500 hover:text-ink-900")}>
+            className={cn("whitespace-nowrap px-3 py-2 text-sm font-semibold rounded-t-lg border-b-2 -mb-px transition", active ? "border-primary text-primary-700" : "border-transparent text-ink-500 hover:text-ink-900")}>
             {t.label}
           </Link>
         );
@@ -165,7 +169,7 @@ export function DescriptionList({ items }: { items: { label: string; value: Reac
     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
       {items.map((it) => (
         <div key={it.label}>
-          <dt className="text-xs uppercase tracking-wide text-ink-500">{it.label}</dt>
+          <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">{it.label}</dt>
           <dd className="text-sm text-ink-900 mt-0.5 break-words">{it.value ?? "—"}</dd>
         </div>
       ))}
@@ -180,5 +184,15 @@ export function Table({ children, className }: { children: ReactNode; className?
     </div>
   );
 }
-export const thCls = "text-left text-xs uppercase tracking-wide text-ink-500 font-medium py-2 pr-3";
-export const tdCls = "py-2.5 pr-3 border-t border-ink-100 align-top";
+export const thCls = "text-left text-[11px] uppercase tracking-wider text-ink-500 font-semibold py-2 pr-3";
+export const tdCls = "py-2.5 pr-3 border-t border-border align-top";
+
+/** Título de seção com marcador institucional. */
+export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 mb-2.5">
+      <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary-700"><span className="h-3.5 w-1 rounded-full bg-primary" />{children}</h2>
+      {action}
+    </div>
+  );
+}

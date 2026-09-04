@@ -10,8 +10,8 @@ export default async function FamilyDocumentsPage({ params }: { params: Promise<
   return (
     <Card title="Documentos autorizados" className="p-0">
       {docs.length === 0 ? <EmptyState title="Nenhum documento liberado" /> : (
-        <ul className="divide-y divide-ink-100 -mt-5">{docs.map((d) => (
-          <li key={d.id} className="px-4 py-3"><a href={`/api/files/${d.id}`} target="_blank" rel="noreferrer" className="font-medium text-brand-700 hover:underline">{d.typeName}</a><p className="text-sm text-ink-500">{d.fileName}{d.expiresAt ? ` · válido até ${isoToBR(d.expiresAt)}` : ""}</p></li>
+        <ul className="divide-y divide-border -mt-5">{docs.map((d) => (
+          <li key={d.id} className="px-4 py-3"><a href={`/api/files/${d.id}`} target="_blank" rel="noreferrer" className="font-medium text-primary-700 hover:underline">{d.typeName}</a><p className="text-sm text-ink-500">{d.fileName}{d.expiresAt ? ` · válido até ${isoToBR(d.expiresAt)}` : ""}</p></li>
         ))}</ul>
       )}
     </Card>

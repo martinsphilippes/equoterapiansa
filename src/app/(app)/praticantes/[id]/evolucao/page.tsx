@@ -30,7 +30,7 @@ export default async function EvolutionPage({ params, searchParams }: { params: 
         <form className="flex flex-wrap items-end gap-2 mb-4 no-print">
           <label className="text-sm">De<Select name="de" defaultValue={initial.id} className="h-9 mt-1">{assessments.map((a) => <option key={a.id} value={a.id}>{isoToBR(a.date)} · {TYPE[a.type]}</option>)}</Select></label>
           <label className="text-sm">Até<Select name="ate" defaultValue={current.id} className="h-9 mt-1">{assessments.map((a) => <option key={a.id} value={a.id}>{isoToBR(a.date)} · {TYPE[a.type]}</option>)}</Select></label>
-          <button className="h-9 px-3 rounded-xl bg-brand-100 text-brand-800 text-sm font-medium">Comparar</button>
+          <button className="h-9 px-3 rounded-xl bg-primary-100 text-primary-800 text-sm font-medium">Comparar</button>
         </form>
         {current.id === initial.id ? <p className="text-sm text-ink-500">Registre uma segunda avaliação para ver o comparativo.</p> : <ComparisonTable rows={cmp.rows} overall={cmp.overall} max={max} labels={{ initial: isoToBR(initial.date), current: isoToBR(current.date) }} />}
       </Card>

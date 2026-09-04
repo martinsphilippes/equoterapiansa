@@ -16,7 +16,7 @@ export default async function PractitionerGuardiansPage({ params }: { params: Pa
   return (
     <Card title="Responsáveis" action={canManage && <div className="flex gap-2"><LinkButton href={`/responsaveis/novo?praticante=${id}`} size="sm" variant="secondary">+ Novo responsável</LinkButton><LinkButton href={`/praticantes/${id}/editar`} size="sm" variant="outline">Vincular existente</LinkButton></div>}>
       {guardians.length === 0 ? <EmptyState title="Nenhum responsável vinculado" description="Cadastre ou vincule um responsável para liberar a área da família." /> : (
-        <ul className="divide-y divide-ink-100">
+        <ul className="divide-y divide-border">
           {guardians.map((g) => (
             <li key={g.id} className="py-3 flex items-center justify-between gap-3">
               <div>

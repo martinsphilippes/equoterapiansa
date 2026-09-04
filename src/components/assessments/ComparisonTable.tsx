@@ -3,7 +3,7 @@ import type { ComparisonRow } from "@/lib/domain/assessments";
 
 export function Delta({ v }: { v: number | null }) {
   if (v === null) return <span className="text-ink-300">—</span>;
-  const cls = v > 0 ? "text-brand-700" : v < 0 ? "text-red-700" : "text-ink-500";
+  const cls = v > 0 ? "text-primary-700" : v < 0 ? "text-red-700" : "text-ink-500";
   return <span className={`font-semibold ${cls}`}>{v > 0 ? "+" : ""}{v}</span>;
 }
 
@@ -20,7 +20,7 @@ export function ComparisonTable({ rows, overall, max, labels }: { rows: Comparis
             <td className={tdCls}><Delta v={r.delta} /></td>
           </tr>
         ))}
-        <tr className="bg-sand-50">
+        <tr className="bg-surface-50">
           <td className={`${tdCls} font-semibold`}>Média geral (de {max})</td>
           <td className={`${tdCls} font-semibold`}>{overall.initial ?? "—"}</td>
           <td className={`${tdCls} font-semibold`}>{overall.current ?? "—"}</td>

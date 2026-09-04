@@ -12,12 +12,12 @@ import type { Appointment } from "@/lib/db/types";
 export function AppointmentActions({ a, canRecord, canManage, compact }: { a: Appointment; canRecord: boolean; canManage: boolean; compact?: boolean }) {
   const [resched, setResched] = useState(false);
   if (a.status === "done") {
-    return a.sessionId ? <Link href={`/atendimentos/${a.sessionId}`} className="text-sm text-brand-700 hover:underline">Ver registro</Link> : null;
+    return a.sessionId ? <Link href={`/atendimentos/${a.sessionId}`} className="text-sm text-primary-700 hover:underline">Ver registro</Link> : null;
   }
   if (a.status === "cancelled" || a.status === "rescheduled") return null;
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      {canRecord && <Link href={`/atendimentos/novo?agendamento=${a.id}`} className="inline-flex items-center h-8 px-3 rounded-lg bg-brand-600 text-white text-xs font-medium hover:bg-brand-700">Registrar</Link>}
+      {canRecord && <Link href={`/atendimentos/novo?agendamento=${a.id}`} className="inline-flex items-center h-8 px-3 rounded-lg bg-primary-600 text-white text-xs font-medium hover:bg-primary-700">Registrar</Link>}
       {a.status === "scheduled" && (canRecord || canManage) && (
         <ActionForm action={setAppointmentStatus}><input type="hidden" name="id" value={a.id} /><input type="hidden" name="status" value="confirmed" /><SubmitButton size="sm" variant="outline" className="h-8 text-xs" pendingText="…">Confirmar</SubmitButton></ActionForm>
       )}
@@ -33,7 +33,7 @@ export function AppointmentActions({ a, canRecord, canManage, compact }: { a: Ap
         </>
       )}
       {resched && (
-        <ActionForm action={setAppointmentStatus} className="w-full mt-2 flex flex-wrap items-end gap-2 rounded-lg bg-sand-50 p-2" onSuccess={() => setResched(false)}>
+        <ActionForm action={setAppointmentStatus} className="w-full mt-2 flex flex-wrap items-end gap-2 rounded-lg bg-surface-50 p-2" onSuccess={() => setResched(false)}>
           <input type="hidden" name="id" value={a.id} />
           <input type="hidden" name="status" value="rescheduled" />
           <Field label="Nova data"><Input type="date" name="newDate" required className="h-9" /></Field>

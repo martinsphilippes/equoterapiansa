@@ -3,15 +3,19 @@ import "./globals.css";
 import { RegisterSW } from "@/components/layout/RegisterSW";
 
 export const metadata: Metadata = {
-  title: { default: "Equoterapia", template: "%s · Equoterapia" },
-  description: "Gestão da operação de equoterapia: equipe, praticantes, agenda e evolução.",
+  title: { default: "Equoterapia Nossa Senhora Aparecida", template: "%s · Equoterapia NSA" },
+  description: "Gestão da Equoterapia Nossa Senhora Aparecida: equipe, praticantes, agenda, evolução e área da família.",
+  applicationName: "Equoterapia NSA",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Equoterapia" },
-  icons: { icon: "/icons/icon-192.png", apple: "/icons/icon-192.png" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Equoterapia NSA" },
+  icons: {
+    icon: [{ url: "/icons/favicon-64.png", sizes: "64x64", type: "image/png" }, { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2f6549",
+  themeColor: "#1420b4",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

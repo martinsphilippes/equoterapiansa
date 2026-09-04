@@ -11,10 +11,10 @@ const AUD: Record<Announcement["audience"], string> = { all: "Todos", staff: "Eq
 export function AnnouncementCard({ a, userId, canManage, showAudience }: { a: Announcement; userId: string; canManage: boolean; showAudience: boolean }) {
   const read = a.readBy.includes(userId);
   return (
-    <li className={`rounded-2xl border p-4 ${read ? "bg-white border-ink-100" : "bg-brand-50 border-brand-100"}`}>
+    <li className={`rounded-2xl border p-4 ${read ? "bg-surface border-border" : "bg-primary-50 border-primary-100"}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-semibold">{!read && <span className="inline-block h-2 w-2 rounded-full bg-brand-600 mr-2 align-middle" />}{a.title}</p>
+          <p className="font-semibold">{!read && <span className="inline-block h-2 w-2 rounded-full bg-primary-600 mr-2 align-middle" />}{a.title}</p>
           <p className="text-xs text-ink-500">{formatDateTime(a.createdAt)} · {a.createdByName}{showAudience ? ` · ${AUD[a.audience]}${a.targetName ? `: ${a.targetName}` : ""}` : ""}</p>
         </div>
         {showAudience && <Badge tone={a.audience === "staff" ? "blue" : a.audience === "all" ? "green" : "amber"}>{AUD[a.audience]}</Badge>}

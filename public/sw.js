@@ -1,7 +1,7 @@
-/* Service worker simples: cache do "app shell" e de arquivos estáticos.
+/* Service worker: cache do "app shell" e de arquivos estáticos.
    Dados (páginas dinâmicas e APIs) sempre vêm da rede para evitar informação desatualizada. */
-const CACHE = "equo-shell-v1";
-const PRECACHE = ["/offline", "/icons/icon-192.png", "/icons/icon-512.png", "/manifest.webmanifest"];
+const CACHE = "equo-nsa-shell-v2";
+const PRECACHE = ["/offline", "/icons/icon-192.png", "/icons/icon-512.png", "/brand/symbol-blue.png", "/brand/symbol-white.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
@@ -19,7 +19,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
+  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") || url.pathname.startsWith("/brand/")) {
     event.respondWith(
       caches.match(req).then((hit) => hit || fetch(req).then((res) => {
         const copy = res.clone();

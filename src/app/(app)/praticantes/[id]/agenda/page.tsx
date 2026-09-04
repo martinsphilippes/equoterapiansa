@@ -30,10 +30,10 @@ export default async function PractitionerAgendaPage({ params }: { params: Param
         <Stat label="Frequência" value={`${freq.percent}%`} hint="realizadas ÷ (realizadas + faltas)" />
       </div>
       <Card title="Próximos atendimentos" action={canManage && p.status !== "closed" && <LinkButton href={`/agenda/novo?praticante=${id}`} size="sm" variant="secondary">+ Agendar</LinkButton>} className="p-0">
-        {upcoming.length === 0 ? <EmptyState title="Nenhum atendimento futuro agendado" /> : <ul className="divide-y divide-ink-100 -mt-5">{upcoming.map((a) => <AppointmentRow key={a.id} a={a} canRecord={canRecord} canManage={canManage} showDate linkPractitioner={false} />)}</ul>}
+        {upcoming.length === 0 ? <EmptyState title="Nenhum atendimento futuro agendado" /> : <ul className="divide-y divide-border -mt-5">{upcoming.map((a) => <AppointmentRow key={a.id} a={a} canRecord={canRecord} canManage={canManage} showDate linkPractitioner={false} />)}</ul>}
       </Card>
       <Card title="Histórico de agendamentos" className="p-0">
-        {past.length === 0 ? <EmptyState title="Sem histórico" /> : <ul className="divide-y divide-ink-100 -mt-5">{past.slice(0, 60).map((a) => <AppointmentRow key={a.id} a={a} canRecord={canRecord} canManage={canManage} showDate linkPractitioner={false} compact />)}</ul>}
+        {past.length === 0 ? <EmptyState title="Sem histórico" /> : <ul className="divide-y divide-border -mt-5">{past.slice(0, 60).map((a) => <AppointmentRow key={a.id} a={a} canRecord={canRecord} canManage={canManage} showDate linkPractitioner={false} compact />)}</ul>}
       </Card>
     </div>
   );

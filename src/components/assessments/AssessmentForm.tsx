@@ -45,14 +45,14 @@ export function AssessmentForm({ practitionerId, assessment, categories, scale, 
           </Field>
         </div>
         <div className="mt-3 flex flex-wrap gap-2 text-xs text-ink-500">
-          {scale.map((l) => <span key={l.value} className="rounded-full bg-sand-100 px-2 py-0.5"><b>{l.value}</b> {l.label}</span>)}
+          {scale.map((l) => <span key={l.value} className="rounded-full bg-surface-100 px-2 py-0.5"><b>{l.value}</b> {l.label}</span>)}
           <span className="ml-auto">{filled}/{total} itens avaliados</span>
         </div>
       </Card>
 
       {categories.map((c) => (
         <Card key={c.id} title={c.name}>
-          <ul className="divide-y divide-ink-100 -my-2">
+          <ul className="divide-y divide-border -my-2">
             {c.items.map((it) => (
               <li key={it.id} className="py-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -61,7 +61,7 @@ export function AssessmentForm({ practitionerId, assessment, categories, scale, 
                     {scale.map((l) => {
                       const on = scores[it.id] === l.value;
                       return (
-                        <button key={l.value} type="button" title={l.label} onClick={() => setScores({ ...scores, [it.id]: on ? null : l.value })} className={cn("h-10 w-10 rounded-lg border text-sm font-semibold", on ? "bg-brand-600 border-brand-600 text-white" : "bg-white border-ink-100 text-ink-700 hover:bg-sand-100")}>{l.value}</button>
+                        <button key={l.value} type="button" title={l.label} onClick={() => setScores({ ...scores, [it.id]: on ? null : l.value })} className={cn("h-10 w-10 rounded-lg border text-sm font-semibold", on ? "bg-primary-600 border-primary-600 text-white" : "bg-surface border-border text-ink-700 hover:bg-surface-100")}>{l.value}</button>
                       );
                     })}
                   </div>
@@ -70,7 +70,7 @@ export function AssessmentForm({ practitionerId, assessment, categories, scale, 
                 {openNotes.has(it.id) ? (
                   <Textarea name={`note_${it.id}`} defaultValue={assessment?.scores[it.id]?.note ?? ""} className="mt-2 min-h-14 text-sm" placeholder="Observação qualitativa" />
                 ) : (
-                  <button type="button" className="mt-1 text-xs text-brand-700 hover:underline" onClick={() => setOpenNotes(new Set(openNotes).add(it.id))}>+ observação</button>
+                  <button type="button" className="mt-1 text-xs text-primary-700 hover:underline" onClick={() => setOpenNotes(new Set(openNotes).add(it.id))}>+ observação</button>
                 )}
               </li>
             ))}
