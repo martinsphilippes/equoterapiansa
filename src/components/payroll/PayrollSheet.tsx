@@ -9,10 +9,11 @@ import { formatBRL } from "@/lib/domain/format";
 import { isoToBR, minutesToHM } from "@/lib/domain/dates";
 import type { PayrollMonth } from "@/lib/db/types";
 
-export function PayrollSheet({ m, canManage, today }: { m: PayrollMonth; canManage: boolean; today: string }) {
+export function PayrollSheet({ m, canManage, today, finance }: { m: PayrollMonth; canManage: boolean; today: string; finance?: React.ReactNode }) {
   const [adjCount, setAdjCount] = useState(Math.max(1, m.adjustments.length));
   const hoursWorked = m.workedMinutes / 60;
   const paid = m.status === "paid";
+  const linked = !!m.payableId;
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
       <div className="lg:col-span-2 space-y-5">
@@ -61,7 +62,8 @@ export function PayrollSheet({ m, canManage, today }: { m: PayrollMonth; canMana
               <Row k="Data" v={isoToBR(m.paidAt)} />
             </dl>
           ) : null}
-          {canManage && !paid && (
+          {linked && <p className="text-xs text-ink-500 mb-2">Esta ficha está vinculada a uma conta a pagar. O pagamento é registrado no módulo financeiro.</p>}
+          {canManage && !paid && !linked && (
             <ActionForm action={markPaid} className="space-y-3 mt-2">
               <input type="hidden" name="collaboratorId" value={m.collaboratorId} />
               <input type="hidden" name="competence" value={m.competence} />
@@ -70,7 +72,7 @@ export function PayrollSheet({ m, canManage, today }: { m: PayrollMonth; canMana
               <ConfirmButton message="Confirmar o pagamento? Os valores deste mês ficarão congelados no histórico." className="w-full">Marcar como PAGO</ConfirmButton>
             </ActionForm>
           )}
-          {canManage && paid && (
+          {canManage && paid && !linked && (
             <ActionForm action={markUnpaid} className="mt-4">
               <input type="hidden" name="id" value={m.id} />
               <ConfirmButton message="Desmarcar o pagamento? Os valores voltarão a ser recalculados." variant="outline" size="sm" className="w-full">Desmarcar pagamento</ConfirmButton>
@@ -78,6 +80,7 @@ export function PayrollSheet({ m, canManage, today }: { m: PayrollMonth; canMana
           )}
           <p className="text-xs text-ink-500 mt-3">Cada alteração fica registrada na auditoria.</p>
         </Card>
+        {finance}
       </div>
     </div>
   );

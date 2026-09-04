@@ -7,7 +7,7 @@ import { sp1 } from "@/lib/types";
 
 export const metadata = { title: "Auditoria" };
 
-const ENTITIES: Record<string, string> = { "": "Todas", collaborator: "Colaboradores", user: "Usuários", timeEntry: "Jornada", payrollMonth: "Pagamentos", document: "Documentos", practitioner: "Praticantes", guardian: "Responsáveis", appointment: "Agenda", session: "Atendimentos", assessment: "Avaliações", report: "Relatórios", announcement: "Comunicados", settings: "Configurações" };
+const ENTITIES: Record<string, string> = { "": "Todas", collaborator: "Colaboradores", user: "Usuários", timeEntry: "Jornada", payrollMonth: "Pagamentos", document: "Documentos", practitioner: "Praticantes", guardian: "Responsáveis", appointment: "Agenda", session: "Atendimentos", assessment: "Avaliações", report: "Relatórios", announcement: "Comunicados", settings: "Configurações", financialEntry: "Lançamentos financeiros", financialTransaction: "Movimentações", billingPlan: "Planos de cobrança", recurrenceRule: "Recorrências", financialCategory: "Categorias financeiras", costCenter: "Centros de custo", financialAccount: "Contas financeiras", paymentMethod: "Formas de pagamento", supplier: "Fornecedores", finance: "Configurações financeiras" };
 
 export default async function AuditPage({ searchParams }: { searchParams: SearchParams }) {
   await requirePermission("audit.view");

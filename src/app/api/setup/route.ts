@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminAuth, db } from "@/lib/firebase/admin";
 import { Collections } from "@/lib/db/collections";
 import { seedDefaults } from "@/lib/db/seed";
+import { seedFinanceDefaults } from "@/lib/db/finance-defaults";
 import { DEFAULT_PERMISSIONS } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
       permissions: DEFAULT_PERMISSIONS.owner, active: true, createdAt: now, updatedAt: now,
     });
     await seedDefaults(body.orgName?.trim() || "Equoterapia");
+    await seedFinanceDefaults();
     await db.collection("auditLogs").add({
       action: "setup", entity: "system", entityId: "setup", userId: user.uid, userName: body.name, at: now, details: {},
     });

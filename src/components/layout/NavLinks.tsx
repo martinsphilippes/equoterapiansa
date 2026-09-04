@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Calendar, Users, Clock, Briefcase, Wallet, Megaphone, ShieldCheck, Settings, Heart, FileText, type LucideIcon } from "lucide-react";
+import { Home, Calendar, Users, Clock, Briefcase, Wallet, CircleDollarSign, Megaphone, ShieldCheck, Settings, Heart, FileText, type LucideIcon } from "lucide-react";
 
 const icons: Record<string, LucideIcon> = {
-  home: Home, calendar: Calendar, users: Users, clock: Clock, team: Briefcase, money: Wallet,
+  home: Home, calendar: Calendar, users: Users, clock: Clock, team: Briefcase, money: Wallet, finance: CircleDollarSign,
   megaphone: Megaphone, shield: ShieldCheck, settings: Settings, heart: Heart, file: FileText,
 };
 

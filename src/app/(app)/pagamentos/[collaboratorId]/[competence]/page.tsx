@@ -5,6 +5,8 @@ import { getSettings } from "@/lib/db/settings";
 import { buildPayrollMonth, payrollHistory } from "@/lib/db/queries/payroll";
 import { Card, PageHeader, Badge } from "@/components/ui";
 import { PayrollSheet } from "@/components/payroll/PayrollSheet";
+import { PayrollFinanceCard } from "@/components/payroll/PayrollFinanceCard";
+import { canSeeFinance } from "@/lib/auth/finance-access";
 import { competenceLabel, todayISO } from "@/lib/domain/dates";
 import { formatBRL } from "@/lib/domain/format";
 import type { Params } from "@/lib/types";
@@ -19,7 +21,8 @@ export default async function PayrollMonthPage({ params }: { params: Params<{ co
     <div className="space-y-5">
       <PageHeader back="/pagamentos" title={`${m.collaboratorName} — ${competenceLabel(competence).toUpperCase()}`} subtitle={<Link prefetch={false} href={`/colaboradores/${collaboratorId}/jornada?mes=${competence}`} className="text-primary-700 hover:underline">Ver registros de jornada do mês</Link>} />
       <MonthNavCompetence collaboratorId={collaboratorId} competence={competence} />
-      <PayrollSheet m={m} canManage={hasPermission(user, "payments.manage")} today={todayISO(settings.timezone)} />
+      <PayrollSheet m={m} canManage={hasPermission(user, "payments.manage")} today={todayISO(settings.timezone)}
+        finance={canSeeFinance(user) && hasPermission(user, "finance.payables.view") || hasPermission(user, "finance.payables.manage") ? <PayrollFinanceCard m={m} canGenerate={hasPermission(user, "finance.payables.manage")} today={todayISO(settings.timezone)} /> : undefined} />
       <Card title="Histórico de pagamentos">
         {history.length === 0 ? <p className="text-sm text-ink-500">Nenhum mês fechado ainda.</p> : (
           <ul className="divide-y divide-border">

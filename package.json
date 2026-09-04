@@ -14,7 +14,7 @@
     "emulators": "firebase emulators:start --only auth,firestore --project equoterapia-demo",
     "dev:emulators": "cp .env.emulator .env.local && next dev",
     "brand": "python3 scripts/brand-assets.py",
-    "e2e": "node e2e/smoke-auth.mjs && node e2e/smoke-phase1.mjs && node e2e/smoke-phase2-5.mjs"
+    "e2e": "node e2e/smoke-auth.mjs && node e2e/smoke-phase1.mjs && node e2e/smoke-phase2-5.mjs && node e2e/smoke-finance.mjs"
   },
   "dependencies": {
     "date-fns": "^4.4.0",

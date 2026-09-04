@@ -49,6 +49,7 @@ export async function markPaid(_prev: ActionResult | null, fd: FormData): Promis
     const built = await buildPayrollMonth(collaboratorId, competence);
     if (!built) return fail("Colaborador não encontrado.");
     if (built.frozen) return fail("Este mês já está marcado como pago.");
+    if (built.payableId) return fail("Esta ficha possui conta a pagar no Financeiro. Registre o pagamento por lá.");
     const data = { ...built, status: "paid" as const, frozen: true, paidAt, paidAmount, notes: opt(fd, "notes") ?? built.notes, updatedAt: Date.now(), updatedBy: user.id };
     const batch = db.batch();
     batch.set(Collections.payrollMonths().doc(built.id), data);
@@ -66,6 +67,7 @@ export async function markUnpaid(_prev: ActionResult | null, fd: FormData): Prom
     const id = str(fd, "id");
     const p = await getDoc(Collections.payrollMonths(), id);
     if (!p) return fail("Registro não encontrado.");
+    if (p.payableId) return fail("Esta ficha foi paga pelo Financeiro. Estorne a movimentação por lá.");
     const batch = db.batch();
     batch.set(Collections.payrollMonths().doc(id), { status: "unpaid", frozen: false, paidAt: null, paidAmount: null, updatedAt: Date.now(), updatedBy: user.id }, { merge: true });
     await audit(actorOf(user), { action: "payroll.unpaid", entity: "payrollMonth", entityId: id, entityLabel: `${p.collaboratorName} ${p.competence}`, details: { previousPaidAmount: p.paidAmount, previousPaidAt: p.paidAt } }, batch);

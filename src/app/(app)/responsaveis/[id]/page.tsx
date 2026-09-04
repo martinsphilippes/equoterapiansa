@@ -9,6 +9,10 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { grantGuardianAccess, resetUserPassword, setUserActive } from "@/lib/actions/users";
 import { formatCPF, formatPhone } from "@/lib/domain/format";
 import type { Params } from "@/lib/types";
+import { canSeeFinance } from "@/lib/auth/finance-access";
+import { guardianFinance } from "@/lib/db/queries/finance";
+import { EntryList } from "@/components/finance/EntryList";
+import { Money } from "@/components/finance/Money";
 
 export default async function GuardianPage({ params }: { params: Params<{ id: string }> }) {
   const user = await requirePermission(["practitioners.view", "practitioners.manage"]);
@@ -18,6 +22,8 @@ export default async function GuardianPage({ params }: { params: Params<{ id: st
   const [practitioners, account] = await Promise.all([getMany(Collections.practitioners(), g.practitionerIds), g.userId ? getDoc(Collections.users(), g.userId) : null]);
   const canManage = hasPermission(user, "practitioners.manage");
   const canUsers = hasPermission(user, "users.manage") || canManage;
+  const showFin = canSeeFinance(user) && hasPermission(user, "finance.receivables.view");
+  const fin = showFin ? await guardianFinance(id) : null;
   return (
     <div>
       <PageHeader back="/responsaveis" title={g.name} subtitle={g.relationship} actions={canManage && <LinkButton href={`/responsaveis/${id}/editar`} variant="outline">Editar</LinkButton>} />
@@ -36,6 +42,16 @@ export default async function GuardianPage({ params }: { params: Params<{ id: st
               <ul className="divide-y divide-border">{practitioners.map((p) => <li key={p.id} className="py-2"><Link prefetch={false} href={`/praticantes/${p.id}`} className="font-medium hover:underline">{p.name}</Link></li>)}</ul>
             )}
           </Card>
+          {fin && (
+            <Card title="Financeiro" className="p-0" action={<Link prefetch={false} href={`/financeiro/receber?responsavel=${id}`} className="text-xs text-primary-600 hover:underline">ver tudo</Link>}>
+              <div className="px-5 pb-3 -mt-2 flex flex-wrap gap-4 text-sm">
+                <span>Em aberto: <Money value={fin.openTotal} className="font-bold" /></span>
+                <span>Vencido: <Money value={fin.overdueTotal} className={`font-bold ${fin.overdueTotal ? "text-danger" : ""}`} /></span>
+                <span>Recebido: <Money value={fin.paidTotal} className="font-bold" /></span>
+              </div>
+              <EntryList entries={fin.entries.filter((e) => e.status !== "paid" && e.status !== "cancelled")} today={fin.today} basePath="/financeiro/receber" emptyTitle="Nenhuma cobrança em aberto" />
+            </Card>
+          )}
         </div>
         <div className="space-y-5">
           <Card title="Acesso ao aplicativo (área da família)">

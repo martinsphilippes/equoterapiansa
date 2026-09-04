@@ -6,6 +6,7 @@ import type {
   EvolutionReport, Guardian, JobRole, PayrollMonth, Practitioner, PractitionerEvent, Session,
   StoredDocument, TimeEntry, UserProfile,
 } from "./types";
+import type { BillingPlan, CostCenter, FinancialAccount, FinancialCategory, FinancialEntry, FinancialSummary, FinancialTransaction, PaymentMethod, RecurrenceRule, Supplier } from "./finance-types";
 
 function col<T extends DocumentData>(name: string) {
   return db.collection(name) as CollectionReference<T>;
@@ -29,6 +30,17 @@ export const Collections = {
   announcements: () => col<Announcement>("announcements"),
   practitionerEvents: () => col<PractitionerEvent>("practitionerEvents"),
   auditLogs: () => col<AuditLog>("auditLogs"),
+  // Financeiro
+  financialCategories: () => col<FinancialCategory>("financialCategories"),
+  costCenters: () => col<CostCenter>("costCenters"),
+  financialAccounts: () => col<FinancialAccount>("financialAccounts"),
+  paymentMethods: () => col<PaymentMethod>("paymentMethods"),
+  suppliers: () => col<Supplier>("suppliers"),
+  financialEntries: () => col<FinancialEntry>("financialEntries"),
+  financialTransactions: () => col<FinancialTransaction>("financialTransactions"),
+  recurrenceRules: () => col<RecurrenceRule>("recurrenceRules"),
+  billingPlans: () => col<BillingPlan>("billingPlans"),
+  financialSummaries: () => col<FinancialSummary>("financialSummaries"),
 };
 
 export function newId(collection: string) {

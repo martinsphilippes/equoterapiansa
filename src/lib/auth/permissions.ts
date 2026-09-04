@@ -32,6 +32,15 @@ export const PERMISSIONS = {
   "settings.manage": "Configurações do sistema",
   "users.manage": "Gerenciar acessos e permissões",
   "audit.view": "Ver auditoria",
+  "finance.dashboard": "Financeiro: ver painel e relatórios",
+  "finance.receivables.view": "Financeiro: ver contas a receber",
+  "finance.receivables.manage": "Financeiro: criar, editar e cancelar contas a receber",
+  "finance.receivables.settle": "Financeiro: registrar recebimentos",
+  "finance.payables.view": "Financeiro: ver contas a pagar",
+  "finance.payables.manage": "Financeiro: criar, editar e cancelar contas a pagar",
+  "finance.payables.settle": "Financeiro: registrar pagamentos",
+  "finance.setup": "Financeiro: categorias, centros de custo, contas, formas e fornecedores",
+  "finance.reconcile": "Financeiro: conciliação e transferências",
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;

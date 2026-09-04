@@ -4,6 +4,7 @@ import { getPractitionerFor } from "@/lib/db/queries/practitioners";
 import { practitionerStats } from "@/lib/db/queries/practitionerStats";
 import { getSettings } from "@/lib/db/settings";
 import { PractitionerHeader } from "@/components/practitioners/PractitionerHeader";
+import { canSeeFinance } from "@/lib/auth/finance-access";
 import type { ReactNode } from "react";
 
 export default async function PractitionerLayout({ children, params }: { children: ReactNode; params: Promise<{ id: string }> }) {
@@ -23,6 +24,7 @@ export default async function PractitionerLayout({ children, params }: { childre
     { href: `${base}/documentos`, label: "Documentos" },
     { href: `${base}/relatorios`, label: "Relatórios" },
     { href: `${base}/historico`, label: "Histórico" },
+    ...(canSeeFinance(user) ? [{ href: `${base}/financeiro`, label: "Financeiro" }] : []),
   ];
   return (
     <div>

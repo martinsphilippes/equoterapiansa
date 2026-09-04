@@ -34,7 +34,7 @@ function assemble(c: Collaborator, competence: string, stored: PayrollMonth | nu
     absences: summary.absences, lateCount: summary.lateCount, earlyLeaveCount: summary.earlyLeaveCount,
     referenceHourlyRate: calc.referenceHourlyRate, baseAmount: calc.baseAmount, adjustments,
     calculatedAmount: calc.calculatedAmount, paidAmount: stored?.paidAmount ?? null,
-    status: "unpaid", paidAt: null, notes: overrides?.notes ?? stored?.notes, frozen: false,
+    status: "unpaid", paidAt: null, notes: overrides?.notes ?? stored?.notes, frozen: false, payableId: stored?.payableId ?? null,
     createdAt: stored?.createdAt ?? now, updatedAt: stored?.updatedAt ?? now, updatedBy: stored?.updatedBy ?? "",
   };
 }

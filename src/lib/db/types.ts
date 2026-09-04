@@ -171,6 +171,8 @@ export interface PayrollMonth {
   notes?: string;
   /** Quando pago, os números ficam congelados. */
   frozen: boolean;
+  /** Conta a pagar gerada a partir desta ficha (Financeiro). */
+  payableId?: string | null;
   createdAt: number;
   updatedAt: number;
   updatedBy: string;

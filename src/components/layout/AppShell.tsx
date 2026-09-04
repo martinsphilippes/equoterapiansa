@@ -1,3 +1,4 @@
+import { canSeeFinance } from "@/lib/auth/finance-access";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { UserProfile } from "@/lib/db/types";
@@ -18,6 +19,7 @@ export function buildNav(user: UserProfile): NavItem[] {
   items.push({ href: "/jornada", label: "Jornada", icon: "clock" });
   if (hasAny(user, ["collaborators.view", "collaborators.manage"])) items.push({ href: "/colaboradores", label: "Equipe", icon: "team" });
   if (hasAny(user, ["payments.manage", "finance.view"])) items.push({ href: "/pagamentos", label: "Pagamentos", icon: "money" });
+  if (canSeeFinance(user)) items.push({ href: "/financeiro", label: "Financeiro", icon: "finance" });
   items.push({ href: "/comunicados", label: "Comunicados", icon: "megaphone" });
   if (hasPermission(user, "audit.view")) items.push({ href: "/auditoria", label: "Auditoria", icon: "shield" });
   if (hasAny(user, ["settings.manage", "users.manage"])) items.push({ href: "/configuracoes", label: "Configurações", icon: "settings" });

@@ -91,6 +91,8 @@ e2e/                  testes de fumaça com Playwright contra os emuladores
 
 `users`, `settings/general`, `jobRoles`, `collaborators`, `documentTypes`, `documents`, `files` + `fileChunks` (conteúdo dos arquivos), `timeEntries` (`{colaborador}_{data}`), `payrollMonths` (`{colaborador}_{AAAA-MM}`), `practitioners`, `guardians`, `appointments`, `sessions`, `assessmentCategories`, `assessments`, `reports`, `announcements`, `practitionerEvents`, `auditLogs`.
 
+Financeiro: `financialCategories`, `costCenters`, `financialAccounts`, `paymentMethods`, `suppliers`, `financialEntries` (contas a receber/pagar, `kind`), `financialTransactions` (entradas, saídas e transferências), `recurrenceRules`, `billingPlans`, `financialSummaries/{AAAA-MM}` (resumos incrementais para painel e DRE) e `financialSettings/general`.
+
 ## Regras de negócio que merecem destaque
 
 - **Horas**: soma dos períodos (entrada→saída) menos intervalo. Atraso = primeira entrada após o início da jornada (acima da tolerância). Faltas = dias úteis passados sem registro ou marcados como falta. Jornada padrão configurável; cada colaborador pode ter jornada própria.
@@ -98,6 +100,17 @@ e2e/                  testes de fumaça com Playwright contra os emuladores
 - **Frequência** = realizadas ÷ (realizadas + faltas). Cancelamentos e reagendamentos não penalizam o praticante.
 - **Evolução** = comparação das médias por área entre a avaliação inicial e a mais recente; a porcentagem é relativa à média inicial. Cada avaliação guarda a escala e as categorias usadas na época (histórico estável mesmo se a configuração mudar).
 - **Encerramento** registra data, motivo, avaliação final, responsável pela decisão e gera o relatório final; cancela agendamentos futuros. O sistema não decide alta.
+
+## Módulo financeiro
+
+- **Um lançamento, muitas origens**: mensalidades (planos por praticante), folha (ficha mensal → conta a pagar com id `pay_{ficha}`), recorrências (`rec_{regra}_{data}`), parcelas (`inst_{grupo}_{n}`) e lançamentos avulsos convivem na mesma coleção. Ids determinísticos tornam a geração idempotente: clicar duas vezes nunca duplica.
+- **Status**: `planned`, `pending`, `partial`, `paid`, `cancelled`; **vencido** é derivado da data (nunca gravado). Cancelamento é lógico e só permitido sem valores liquidados (estorne as movimentações antes).
+- **Movimentações**: cada recebimento/pagamento gera uma transação na conta; transferências têm duas pernas (`transfer_out`/`transfer_in`) e não entram como receita/despesa. Saldo = inicial + entradas − saídas (agregações, 2 leituras por conta).
+- **Competência × caixa**: `financialSummaries` guarda por mês o previsto (competência), o recebido da competência e o caixa (data da movimentação). Painel, DRE e relatórios leem 1 documento por mês.
+- **Folha**: com conta a pagar vinculada, a ficha não aceita "marcar pago" manual; liquidar a conta marca a ficha como paga (histórico congelado).
+- **Família**: o responsável vê apenas cobranças suas com `visibleToGuardian`, se a configuração "mostrar aos responsáveis" estiver ativa.
+- **Permissões** granulares (`finance.*`): o Dono tem todas; Gestor recebe as que forem marcadas em Configurações → Usuários; demais perfis nenhuma.
+- **Teste**: `node e2e/smoke-finance.mjs` percorre os seis fluxos (receita → recebimento, parcelas/parcial/vencido, recorrência, plano de cobrança, folha → conta a pagar, área da família), além de transferência, conciliação, DRE e auditoria.
 
 ## Performance (como medir)
 
