@@ -4,6 +4,7 @@ import { AggregateField } from "firebase-admin/firestore";
 import { Collections, getDoc, mapDocs } from "../collections";
 import { getSettings } from "../settings";
 import { allAccounts } from "./finance-ref";
+import { safeQuery } from "../firestore-safe";
 import { OPEN_STATUSES, displayStatus } from "@/lib/domain/finance";
 import { addMonths, monthRange, todayISO } from "@/lib/domain/dates";
 import type { FinanceKind, FinancialEntry, FinancialSummary, FinancialTransaction } from "../finance-types";
@@ -45,7 +46,8 @@ export async function listEntries(f: EntryFilters): Promise<FinancialEntry[]> {
     if (f.month) { const { start, end } = monthRange(f.month); q = q.where("dueDate", ">=", start).where("dueDate", "<=", end); }
   }
   q = q.orderBy("dueDate", "asc").limit(f.limit ?? 500);
-  let items = mapDocs(await q.get());
+  const query = q;
+  let items = await safeQuery(`lançamentos (${f.kind})`, async () => mapDocs(await query.get()), [] as FinancialEntry[]);
   if (f.categoryId) items = items.filter((e) => e.categoryId === f.categoryId);
   if (f.costCenterId) items = items.filter((e) => e.costCenterId === f.costCenterId);
   return items;
@@ -54,14 +56,16 @@ export async function listEntries(f: EntryFilters): Promise<FinancialEntry[]> {
 export const getEntry = cache(async (id: string) => getDoc(Collections.financialEntries(), id));
 
 export async function transactionsOfEntry(entryId: string): Promise<FinancialTransaction[]> {
-  return mapDocs(await Collections.financialTransactions().where("entryId", "==", entryId).get()).sort((a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
+  return (await safeQuery("movimentações do lançamento", async () => mapDocs(await Collections.financialTransactions().where("entryId", "==", entryId).get()), [] as FinancialTransaction[])).sort((a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
 }
 
 export async function listTransactions(month: string, accountId?: string): Promise<FinancialTransaction[]> {
   const { start, end } = monthRange(month);
   let q: FirebaseFirestore.Query<FinancialTransaction> = Collections.financialTransactions().where("date", ">=", start).where("date", "<=", end);
   if (accountId) q = q.where("accountId", "==", accountId);
-  return mapDocs(await q.orderBy("date", "desc").limit(1000).get()).sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+  const query = q.orderBy("date", "desc").limit(1000);
+  const items = await safeQuery("movimentações", async () => mapDocs(await query.get()), [] as FinancialTransaction[]);
+  return items.sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
 }
 
 /** Saldo por conta = saldo inicial + entradas − saídas (agregações: 2 leituras por conta). */
@@ -69,11 +73,8 @@ export const accountBalances = cache(async () => {
   const accounts = (await allAccounts()).filter((a) => a.active);
   const rows = await Promise.all(accounts.map(async (a) => {
     const base = Collections.financialTransactions().where("accountId", "==", a.id).where("reversed", "==", false);
-    const [ins, outs] = await Promise.all([
-      base.where("type", "in", ["in", "transfer_in"]).aggregate({ total: AggregateField.sum("amount") }).get(),
-      base.where("type", "in", ["out", "transfer_out"]).aggregate({ total: AggregateField.sum("amount") }).get(),
-    ]);
-    const inTotal = Number(ins.data().total ?? 0), outTotal = Number(outs.data().total ?? 0);
+    const sum = (types: string[]) => safeQuery("saldo das contas", async () => Number((await base.where("type", "in", types).aggregate({ total: AggregateField.sum("amount") }).get()).data().total ?? 0), 0);
+    const [inTotal, outTotal] = await Promise.all([sum(["in", "transfer_in"]), sum(["out", "transfer_out"])]);
     return { account: a, inTotal, outTotal, balance: Math.round((a.initialBalance + inTotal - outTotal) * 100) / 100 };
   }));
   return rows;
@@ -84,11 +85,14 @@ export const openTotals = cache(async () => {
   const today = await todayFin();
   const one = async (kind: FinanceKind) => {
     const base = Collections.financialEntries().where("kind", "==", kind).where("status", "in", [...OPEN_STATUSES]);
-    const [open, overdue] = await Promise.all([
-      base.aggregate({ total: AggregateField.sum("openAmount"), count: AggregateField.count() }).get(),
-      base.where("dueDate", "<", today).aggregate({ total: AggregateField.sum("openAmount"), count: AggregateField.count() }).get(),
-    ]);
-    return { open: Number(open.data().total ?? 0), openCount: Number(open.data().count ?? 0), overdue: Number(overdue.data().total ?? 0), overdueCount: Number(overdue.data().count ?? 0) };
+    const label = kind === "receivable" ? "totais a receber" : "totais a pagar";
+    const zero = { total: 0, count: 0 };
+    const agg = (q: FirebaseFirestore.Query<FinancialEntry>) => safeQuery(label, async () => {
+      const d = (await q.aggregate({ total: AggregateField.sum("openAmount"), count: AggregateField.count() }).get()).data();
+      return { total: Number(d.total ?? 0), count: Number(d.count ?? 0) };
+    }, zero);
+    const [open, overdue] = await Promise.all([agg(base), agg(base.where("dueDate", "<", today))]);
+    return { open: open.total, openCount: open.count, overdue: overdue.total, overdueCount: overdue.count };
   };
   const [receivable, payable] = await Promise.all([one("receivable"), one("payable")]);
   return { receivable, payable };
@@ -116,7 +120,8 @@ export function bucketTotal(s: FinancialSummary | undefined, path: "expected.inc
 export async function upcomingEntries(kind: FinanceKind, days = 7, limit = 8): Promise<FinancialEntry[]> {
   const today = await todayFin();
   const end = addDaysIso(today, days);
-  return mapDocs(await Collections.financialEntries().where("kind", "==", kind).where("status", "in", [...OPEN_STATUSES]).where("dueDate", ">=", today).where("dueDate", "<=", end).orderBy("dueDate").limit(limit).get());
+  const q = Collections.financialEntries().where("kind", "==", kind).where("status", "in", [...OPEN_STATUSES]).where("dueDate", ">=", today).where("dueDate", "<=", end).orderBy("dueDate").limit(limit);
+  return safeQuery("próximos vencimentos", async () => mapDocs(await q.get()), [] as FinancialEntry[]);
 }
 function addDaysIso(iso: string, d: number) { const [y, m, dd] = iso.split("-").map(Number); return new Date(Date.UTC(y, m - 1, dd + d)).toISOString().slice(0, 10); }
 
@@ -144,7 +149,7 @@ export async function guardianFinance(guardianId: string) {
 
 export async function practitionerFinance(practitionerId: string) {
   const today = await todayFin();
-  const [entries, plans] = await Promise.all([listEntries({ kind: "receivable", practitionerId, status: "all", limit: 300 }), mapDocs(await Collections.billingPlans().where("practitionerId", "==", practitionerId).get())]);
+  const [entries, plans] = await Promise.all([listEntries({ kind: "receivable", practitionerId, status: "all", limit: 300 }), safeQuery("planos do praticante", async () => mapDocs(await Collections.billingPlans().where("practitionerId", "==", practitionerId).get()), [])]);
   const open = entries.filter((e) => OPEN_STATUSES.includes(e.status as (typeof OPEN_STATUSES)[number]));
   return {
     today, entries, plans,

@@ -7,6 +7,7 @@ import { practitionerFinance } from "@/lib/db/queries/finance";
 import { Badge, Card, EmptyState, LinkButton, Stat } from "@/components/ui";
 import { EntryList } from "@/components/finance/EntryList";
 import { Money } from "@/components/finance/Money";
+import { IndexNotice } from "@/components/finance/IndexNotice";
 import { FREQUENCY_LABEL, applyDiscount } from "@/lib/domain/finance";
 import type { Params } from "@/lib/types";
 
@@ -40,6 +41,7 @@ export default async function PractitionerFinancePage({ params }: { params: Para
       <Card title="Cobranças" className="p-0" action={canManage && <LinkButton size="sm" variant="outline" href={`/financeiro/receber/novo?praticante=${id}`}>+ Cobrança avulsa</LinkButton>}>
         <div className="-mt-5"><EntryList entries={[...fin.entries].reverse()} today={fin.today} basePath="/financeiro/receber" emptyTitle="Nenhuma cobrança" /></div>
       </Card>
+      <IndexNotice user={user} />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { guardianFinance } from "@/lib/db/queries/finance";
 import { Card, EmptyState, PageHeader, Stat, Badge } from "@/components/ui";
 import { Money } from "@/components/finance/Money";
 import { EntryStatusBadge } from "@/components/finance/EntryStatusBadge";
+import { IndexNotice } from "@/components/finance/IndexNotice";
 import { isoToBR } from "@/lib/domain/dates";
 import { displayStatus } from "@/lib/domain/finance";
 
@@ -46,6 +47,7 @@ export default async function FamilyFinancePage() {
           ))}</ul>
         )}
       </Card>
+      <IndexNotice />
       <p className="text-xs text-ink-500">Formas de pagamento e comprovantes: combine diretamente com a secretaria.</p>
     </div>
   );

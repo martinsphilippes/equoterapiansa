@@ -132,14 +132,14 @@ export function Stat({ label, value, hint, tone, icon }: { label: string; value:
   );
 }
 
-export function Alert({ children, tone = "info" }: { children: ReactNode; tone?: "info" | "error" | "success" | "warning" }) {
+export function Alert({ children, tone = "info", className }: { children: ReactNode; tone?: "info" | "error" | "success" | "warning"; className?: string }) {
   const t = {
     info: "bg-info-soft text-primary-800 border-primary-100",
     error: "bg-danger-soft text-danger border-red-100",
     success: "bg-success-soft text-success border-emerald-100",
     warning: "bg-warning-soft text-warning border-amber-100",
   }[tone];
-  return <div className={cn("rounded-xl border px-4 py-3 text-sm font-medium", t)}>{children}</div>;
+  return <div className={cn("rounded-xl border px-4 py-3 text-sm font-medium", t, className)}>{children}</div>;
 }
 
 export function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {

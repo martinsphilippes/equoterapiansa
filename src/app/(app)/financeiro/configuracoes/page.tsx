@@ -5,13 +5,14 @@ import { ActionForm } from "@/components/ui/ActionForm";
 import { SubmitButton } from "@/components/ui/FormStatus";
 import { saveAccount, saveCategory, saveCostCenter, savePaymentMethod, toggleAccount, toggleCategory, toggleCostCenter, togglePaymentMethod, updateFinanceSettings } from "@/lib/actions/finance-setup";
 import { Money } from "@/components/finance/Money";
+import { IndexPanel } from "@/components/finance/IndexPanel";
 import type { SearchParams } from "@/lib/types";
 import { sp1 } from "@/lib/types";
 import Link from "next/link";
 
 export const metadata = { title: "Configurações financeiras" };
 const DRE = [["revenue", "Receita bruta"], ["deductions", "Dedução da receita"], ["costs", "Custo"], ["operating", "Despesa operacional"], ["other", "Outras"]];
-const TABS = [["categorias", "Categorias"], ["centros", "Centros de custo"], ["contas", "Contas financeiras"], ["formas", "Formas de pagamento"], ["geral", "Geral"]];
+const TABS = [["categorias", "Categorias"], ["centros", "Centros de custo"], ["contas", "Contas financeiras"], ["formas", "Formas de pagamento"], ["geral", "Geral"], ["indices", "Índices do banco"]];
 
 export default async function FinanceSettingsPage({ searchParams }: { searchParams: SearchParams }) {
   await requireFinance("finance.setup");
@@ -135,6 +136,8 @@ export default async function FinanceSettingsPage({ searchParams }: { searchPara
           <Card title="Nova forma"><ActionForm action={savePaymentMethod} className="space-y-3" resetOnSuccess><Field label="Nome"><Input name="name" required /></Field><SubmitButton>Adicionar</SubmitButton></ActionForm></Card>
         </div>
       )}
+
+      {tab === "indices" && <IndexPanel />}
 
       {tab === "geral" && (
         <Card title="Padrões e integrações" className="max-w-2xl">

@@ -13,6 +13,12 @@ const RUN = Date.now().toString(36);
 const today = new Date().toISOString().slice(0, 10);
 const ym = today.slice(0, 7);
 const brl = (n) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
+const parseBRL = (t) => Number((t.match(/-?R\$\s*[\d.]+,\d{2}/) ?? ["0"])[0].replace(/[^\d,-]/g, "").replace(".", "").replace(",", "."));
+async function dreRow(page, base, month, label) {
+  await page.goto(`${base}/financeiro/dre?mes=${month}`, { waitUntil: "networkidle" });
+  await page.waitForSelector("text=Receita bruta");
+  return parseBRL(await page.locator(`tr:has-text("${label}")`).first().innerText());
+}
 async function login(p, email, pass) {
   await p.goto(BASE + "/entrar");
   await p.fill('input[type="email"]', email);
@@ -34,7 +40,8 @@ try {
     await page.waitForSelector("text=Saldo das contas", { timeout: 60000 });
   }
   await page.waitForSelector("text=A receber");
-  step("módulo inicializado / dashboard");
+  const grossBefore = await dreRow(page, BASE, ym, "Receita bruta");
+  step(`módulo inicializado / dashboard (receita bruta inicial ${grossBefore})`);
   await page.goto(BASE + "/financeiro/configuracoes?aba=contas");
   await page.fill('form:has(button:has-text("Adicionar")) input[name="name"]', "Banco Teste " + RUN);
   await page.fill('form:has(button:has-text("Adicionar")) input[name="initialBalance"]', "1000");
@@ -78,7 +85,7 @@ try {
   await page.selectOption('select[name="categoryId"]', await optionByText(page, 'select[name="categoryId"]', "Mensalidade"));
   await page.selectOption('select[name="guardianId"]', { label: `Carla Fin ${RUN}` });
   await page.click('button:has-text("Criar receita")');
-  await page.waitForURL(/\/financeiro\/receber\/[^/]+$/, { timeout: 60000 });
+  await page.waitForURL((u) => /\/financeiro\/receber\/[^/]+$/.test(u.pathname) && !u.pathname.endsWith("/novo"), { timeout: 60000 });
   const rec1 = page.url();
   await page.waitForSelector("text=Registrar recebimento");
   await page.fill('form:has(button:has-text("Registrar recebimento")) input[name="amount"]', "150,00");
@@ -125,7 +132,7 @@ try {
   await page.fill('input[name="dueDate"]', `${ym}-05`);
   await page.selectOption('select[name="categoryId"]', await optionByText(page, 'select[name="categoryId"]', "Aluguel"));
   await page.click('button:has-text("Criar despesa")');
-  await page.waitForURL(/\/financeiro\/(pagar|recorrencias)/, { timeout: 60000 });
+  await page.waitForURL(/\/financeiro\/pagar\/rec_/, { timeout: 60000 });
   await page.goto(`${BASE}/financeiro/recorrencias`);
   await page.waitForSelector(`text=Aluguel ${RUN}`);
   const next = new Date(); next.setUTCMonth(next.getUTCMonth() + 2);
@@ -211,10 +218,12 @@ try {
   // ----- Movimentações, transferência, conciliação, DRE, relatórios, inadimplência
   await page.goto(`${BASE}/financeiro/movimentacoes?mes=${ym}`);
   await page.waitForSelector(`text=Avaliação inicial ${RUN}`);
+  await page.selectOption('select[name="fromAccountId"]', { label: "Caixa" });
   await page.selectOption('select[name="toAccountId"]', { label: `Banco Teste ${RUN}` });
-  await page.fill('input[name="amount"]', "50,00");
+  if (await page.$(`select[name="toAccountId"] option:has-text("Caixa")`)) throw new Error("destino ainda lista a conta de origem");
+  await page.fill('form:has(button:has-text("Transferir")) input[name="amount"]', "50,00");
   await page.click('button:has-text("Transferir")');
-  await page.waitForTimeout(2000);
+  await page.waitForSelector("text=Transferência registrada", { timeout: 30000 });
   await page.reload();
   await page.waitForSelector("text=transferência");
   await page.click('li:has-text("Avaliação inicial") button:has-text("Conferir")');
@@ -229,12 +238,20 @@ try {
   await page.goto(`${BASE}/financeiro/dre?mes=${ym}`);
   await page.waitForSelector("text=Receita bruta");
   // resumo incremental por competência: avaliação (150) + mensalidade com 10% de bolsa (360)
-  await page.waitForSelector('tr:has-text("Receita bruta") >> text=R$ 510,00');
-  await page.waitForSelector('tr:has-text("Mensalidades") >> text=R$ 510,00');
+  const grossAfter = await dreRow(page, BASE, ym, "Receita bruta");
+  if (Math.round((grossAfter - grossBefore) * 100) !== 51000) throw new Error(`receita bruta variou ${grossAfter - grossBefore}, esperado 510`);
+  const deductions = await dreRow(page, BASE, ym, "Descontos");
+  if (deductions > 0) throw new Error("dedução deveria aparecer negativa");
   await page.goto(`${BASE}/financeiro?mes=${ym}`);
   await page.waitForSelector("text=Saldo das contas");
   await page.waitForSelector(`text=Banco Teste ${RUN}`);
   step("movimentações, transferência, conciliação, DRE e relatórios");
+
+  // ----- Painel de índices do banco
+  await page.goto(`${BASE}/financeiro/configuracoes?aba=indices`);
+  await page.waitForSelector("text=Índices do banco de dados");
+  await page.waitForSelector('button:has-text("Conferir novamente"), button:has-text("Criar índices que faltam")');
+  step("painel de índices disponível");
 
   // ----- Fluxo 6: área da família vê só as próprias cobranças
   const ctx2 = await browser.newContext({ viewport: { width: 390, height: 844 } });

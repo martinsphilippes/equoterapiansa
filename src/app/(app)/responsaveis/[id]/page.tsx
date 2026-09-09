@@ -13,6 +13,7 @@ import { canSeeFinance } from "@/lib/auth/finance-access";
 import { guardianFinance } from "@/lib/db/queries/finance";
 import { EntryList } from "@/components/finance/EntryList";
 import { Money } from "@/components/finance/Money";
+import { IndexNotice } from "@/components/finance/IndexNotice";
 
 export default async function GuardianPage({ params }: { params: Params<{ id: string }> }) {
   const user = await requirePermission(["practitioners.view", "practitioners.manage"]);
@@ -52,6 +53,7 @@ export default async function GuardianPage({ params }: { params: Params<{ id: st
               <EntryList entries={fin.entries.filter((e) => e.status !== "paid" && e.status !== "cancelled")} today={fin.today} basePath="/financeiro/receber" emptyTitle="Nenhuma cobrança em aberto" />
             </Card>
           )}
+          {fin && <IndexNotice user={user} />}
         </div>
         <div className="space-y-5">
           <Card title="Acesso ao aplicativo (área da família)">

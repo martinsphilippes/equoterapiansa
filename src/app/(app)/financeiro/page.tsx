@@ -12,6 +12,7 @@ import { BarRows, MonthBars } from "@/components/finance/MiniCharts";
 import { competenceLabel } from "@/lib/domain/dates";
 import type { SearchParams } from "@/lib/types";
 import { sp1 } from "@/lib/types";
+import { IndexNotice } from "@/components/finance/IndexNotice";
 
 export const metadata = { title: "Financeiro" };
 
@@ -90,6 +91,8 @@ export default async function FinanceDashboard({ searchParams }: { searchParams:
         <Card title="Vencem nos próximos 7 dias · a receber" className="p-0">{upRec.length ? <div className="-mt-5"><EntryList entries={upRec} today={today} basePath="/financeiro/receber" /></div> : <EmptyState title="Nada a receber nos próximos dias" />}</Card>
         <Card title="Vencem nos próximos 7 dias · a pagar" className="p-0">{upPay.length ? <div className="-mt-5"><EntryList entries={upPay} today={today} basePath="/financeiro/pagar" /></div> : <EmptyState title="Nada a pagar nos próximos dias" />}</Card>
       </section>
+
+      <IndexNotice user={user} />
     </div>
   );
 }

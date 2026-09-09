@@ -6,11 +6,12 @@ import { Money } from "@/components/finance/Money";
 import { PrintButton } from "@/components/ui/PrintButton";
 import { daysLate } from "@/lib/domain/finance";
 import { isoToBR } from "@/lib/domain/dates";
+import { IndexNotice } from "@/components/finance/IndexNotice";
 
 export const metadata = { title: "Inadimplência" };
 
 export default async function DelinquencyPage() {
-  await requireFinance(["finance.dashboard", "finance.receivables.view"]);
+  const user = await requireFinance(["finance.dashboard", "finance.receivables.view"]);
   const [today, list, totals] = await Promise.all([todayFin(), overdueEntries("receivable"), openTotals()]);
   const byGuardian = new Map<string, { name: string; practitioners: Set<string>; total: number; count: number; oldest: string }>();
   for (const e of list) {
@@ -59,6 +60,7 @@ export default async function DelinquencyPage() {
           ))}</ul>
         )}
       </Card>
+      <IndexNotice user={user} />
     </div>
   );
 }

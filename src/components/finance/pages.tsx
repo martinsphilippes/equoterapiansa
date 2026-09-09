@@ -13,6 +13,7 @@ import { MonthNav } from "@/components/time/MonthNav";
 import { EntryList } from "./EntryList";
 import { EntryForm, type EntryFormRefs } from "./EntryForm";
 import { SettleForm } from "./SettleForm";
+import { IndexNotice } from "./IndexNotice";
 import { EntryStatusBadge } from "./EntryStatusBadge";
 import { Money } from "./Money";
 import { cancelEntry, reverseTransaction } from "@/lib/actions/finance-entries";
@@ -80,6 +81,7 @@ export async function EntriesIndex({ kind, sp }: { kind: FinanceKind; sp: Record
         <Stat label="Em aberto" value={<Money value={open.reduce((a, e) => a + e.openAmount, 0)} />} tone={open.some((e) => e.dueDate < today) ? "red" : "default"} hint={`${open.length} lançamento(s)`} />
       </div>
       <Card className="p-0"><EntryList entries={entries} today={today} basePath={base(kind)} emptyTitle="Nenhum lançamento neste filtro" /></Card>
+      <IndexNotice user={user} />
     </div>
   );
 }

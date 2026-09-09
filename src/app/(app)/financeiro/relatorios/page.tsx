@@ -11,6 +11,7 @@ import { competenceLabel, isoToBR, listDays } from "@/lib/domain/dates";
 import { daysLate, displayStatus, STATUS_LABEL } from "@/lib/domain/finance";
 import type { SearchParams } from "@/lib/types";
 import { sp1 } from "@/lib/types";
+import { IndexNotice } from "@/components/finance/IndexNotice";
 
 export const metadata = { title: "Relatórios financeiros" };
 
@@ -21,7 +22,7 @@ const TYPES: [string, string][] = [
 ];
 
 export default async function ReportsPage({ searchParams }: { searchParams: SearchParams }) {
-  await requireFinance("finance.dashboard");
+  const user = await requireFinance("finance.dashboard");
   const sp = await searchParams;
   const today = await todayFin();
   const tipo = sp1(sp, "tipo") ?? "receber";
@@ -98,6 +99,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
       </form>
       <Card title={`${TYPES.find((t) => t[0] === tipo)?.[1]} · ${competenceLabel(month)}`}>{body}</Card>
       <p className="text-xs text-ink-500 no-print">Use “Imprimir / salvar PDF” para exportar. Outros relatórios: <Link prefetch={false} href="/financeiro/dre" className="text-primary-600 hover:underline">DRE</Link> · <Link prefetch={false} href="/financeiro/inadimplencia" className="text-primary-600 hover:underline">Inadimplência</Link>.</p>
+      <IndexNotice user={user} />
     </div>
   );
 }

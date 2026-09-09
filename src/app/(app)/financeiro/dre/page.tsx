@@ -10,11 +10,12 @@ import type { DreGroup, FinancialSummary } from "@/lib/db/finance-types";
 import type { SearchParams } from "@/lib/types";
 import { sp1 } from "@/lib/types";
 import Link from "next/link";
+import { IndexNotice } from "@/components/finance/IndexNotice";
 
 export const metadata = { title: "DRE gerencial" };
 
 export default async function DrePage({ searchParams }: { searchParams: SearchParams }) {
-  await requireFinance("finance.dashboard");
+  const user = await requireFinance("finance.dashboard");
   const sp = await searchParams;
   const today = await todayFin();
   const month = sp1(sp, "mes") ?? today.slice(0, 7);
@@ -55,6 +56,7 @@ export default async function DrePage({ searchParams }: { searchParams: SearchPa
         </Table>
         <p className="text-xs text-ink-500 mt-3">Cada categoria é mapeada a um grupo da DRE em Configurações → Categorias. Visão gerencial, não contábil.</p>
       </Card>
+      <IndexNotice user={user} />
     </div>
   );
 }

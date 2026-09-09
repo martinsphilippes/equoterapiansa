@@ -11,6 +11,7 @@ import { Money } from "@/components/finance/Money";
 import { competenceLabel } from "@/lib/domain/dates";
 import type { SearchParams } from "@/lib/types";
 import { sp1 } from "@/lib/types";
+import { IndexNotice } from "@/components/finance/IndexNotice";
 
 export const metadata = { title: "Movimentações" };
 
@@ -52,6 +53,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           <Card title="Conciliação"><p className="text-sm text-ink-700">Confira cada movimentação com o extrato bancário e marque como conferida. Correções de data e conta ficam registradas na auditoria. Importação de OFX/CSV fica preparada para uma próxima etapa.</p></Card>
         </div>
       </div>
+      <IndexNotice user={user} />
     </div>
   );
 }

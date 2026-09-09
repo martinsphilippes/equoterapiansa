@@ -42,7 +42,7 @@ npm run e2e
    firebase use SEU_PROJETO
    firebase deploy --only firestore:rules,firestore:indexes
    ```
-   Ou cole `firestore.rules` em *Firestore → Regras* e crie os 4 índices de `firestore.indexes.json` em *Firestore → Índices*.
+   Ou cole `firestore.rules` em *Firestore → Regras*. Os índices de `firestore.indexes.json` podem ser criados pelo próprio app em *Financeiro → Configurações → Índices do banco*.
 5. **Configurações do projeto → Contas de serviço → Gerar nova chave privada**. Converta para base64:
    ```bash
    base64 -w0 service-account.json      # macOS: base64 -i service-account.json
@@ -110,6 +110,7 @@ Financeiro: `financialCategories`, `costCenters`, `financialAccounts`, `paymentM
 - **Folha**: com conta a pagar vinculada, a ficha não aceita "marcar pago" manual; liquidar a conta marca a ficha como paga (histórico congelado).
 - **Família**: o responsável vê apenas cobranças suas com `visibleToGuardian`, se a configuração "mostrar aos responsáveis" estiver ativa.
 - **Permissões** granulares (`finance.*`): o Dono tem todas; Gestor recebe as que forem marcadas em Configurações → Usuários; demais perfis nenhuma.
+- **Índices**: as consultas com vários filtros e as somas exigem índices compostos. Em Financeiro → Configurações → Índices do banco o Dono confere o estado de cada um e cria os que faltam com um clique (usa a credencial do próprio app; alternativa pelo terminal: `firebase deploy --only firestore:indexes`). Enquanto um índice falta ou está sendo construído, a tela abre normalmente com um aviso, em vez de quebrar.
 - **Teste**: `node e2e/smoke-finance.mjs` percorre os seis fluxos (receita → recebimento, parcelas/parcial/vencido, recorrência, plano de cobrança, folha → conta a pagar, área da família), além de transferência, conciliação, DRE e auditoria.
 
 ## Performance (como medir)

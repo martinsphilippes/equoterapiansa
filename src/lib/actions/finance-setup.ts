@@ -5,6 +5,7 @@ import { Collections, getDoc } from "@/lib/db/collections";
 import { audit } from "@/lib/db/audit";
 import { financeSettingsRef } from "@/lib/db/queries/finance-ref";
 import { seedFinanceDefaults } from "@/lib/db/finance-defaults";
+import { createMissingIndexes } from "@/lib/db/index-admin";
 import type { AccountType, CategoryType, DreGroup } from "@/lib/db/finance-types";
 import { guard, str, opt, num, bool, success, fail, ISO_DATE, type ActionResult } from "./result";
 
@@ -15,8 +16,16 @@ export async function initFinance(): Promise<ActionResult> {
     const user = await actionUser("finance.setup");
     const created = await seedFinanceDefaults();
     if (created) await audit(actorOf(user), { action: "finance.seed", entity: "finance", entityId: "seed" });
+    // Os índices são criados junto: sem eles, painel e listas ficariam sem dados.
+    let indexes = "";
+    try {
+      const r = await createMissingIndexes();
+      indexes = r.created > 0 ? ` ${r.created} índice(s) do banco em construção (leva alguns minutos).` : "";
+    } catch {
+      indexes = "";
+    }
     revalidatePath("/financeiro");
-    return success(created ? "Cadastros iniciais criados." : "Cadastros já existentes.");
+    return success((created ? "Cadastros iniciais criados." : "Cadastros já existentes.") + indexes);
   });
 }
 

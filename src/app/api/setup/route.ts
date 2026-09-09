@@ -3,6 +3,7 @@ import { adminAuth, db } from "@/lib/firebase/admin";
 import { Collections } from "@/lib/db/collections";
 import { seedDefaults } from "@/lib/db/seed";
 import { seedFinanceDefaults } from "@/lib/db/finance-defaults";
+import { createMissingIndexes } from "@/lib/db/index-admin";
 import { DEFAULT_PERMISSIONS } from "@/lib/auth/permissions";
 
 export const dynamic = "force-dynamic";
@@ -28,10 +29,13 @@ export async function POST(req: Request) {
     });
     await seedDefaults(body.orgName?.trim() || "Equoterapia");
     await seedFinanceDefaults();
+    // Melhor esforço: cria os índices compostos já na instalação.
+    let indexes: unknown = null;
+    try { indexes = await createMissingIndexes(); } catch (e) { indexes = { error: e instanceof Error ? e.message : String(e) }; }
     await db.collection("auditLogs").add({
-      action: "setup", entity: "system", entityId: "setup", userId: user.uid, userName: body.name, at: now, details: {},
+      action: "setup", entity: "system", entityId: "setup", userId: user.uid, userName: body.name, at: now, details: { indexes },
     });
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, indexes });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Erro ao criar usuário.";
     return NextResponse.json({ error: msg.includes("email-already-exists") ? "Este e-mail já está em uso." : msg }, { status: 400 });
