@@ -110,7 +110,7 @@ Financeiro: `financialCategories`, `costCenters`, `financialAccounts`, `paymentM
 - **Folha**: com conta a pagar vinculada, a ficha não aceita "marcar pago" manual; liquidar a conta marca a ficha como paga (histórico congelado).
 - **Família**: o responsável vê apenas cobranças suas com `visibleToGuardian`, se a configuração "mostrar aos responsáveis" estiver ativa.
 - **Permissões** granulares (`finance.*`): o Dono tem todas; Gestor recebe as que forem marcadas em Configurações → Usuários; demais perfis nenhuma.
-- **Índices**: as consultas com vários filtros e as somas exigem índices compostos. Em Financeiro → Configurações → Índices do banco o Dono confere o estado de cada um e cria os que faltam com um clique (usa a credencial do próprio app; alternativa pelo terminal: `firebase deploy --only firestore:indexes`). Enquanto um índice falta ou está sendo construído, a tela abre normalmente com um aviso, em vez de quebrar.
+- **Índices**: as consultas com vários filtros e as somas exigem índices compostos. Em Financeiro → Configurações → Índices do banco o Dono confere o estado de cada um e cria os que faltam com um clique (usa a credencial do próprio app; alternativa pelo terminal: `firebase deploy --only firestore:indexes`). Enquanto um índice falta ou está sendo construído, a tela abre normalmente com um aviso, em vez de quebrar, e o sistema tenta criar sozinho o que falta (uma tentativa a cada 10 minutos por instância, depois de responder a requisição).
 - **Teste**: `node e2e/smoke-finance.mjs` percorre os seis fluxos (receita → recebimento, parcelas/parcial/vencido, recorrência, plano de cobrança, folha → conta a pagar, área da família), além de transferência, conciliação, DRE e auditoria.
 
 ## Performance (como medir)

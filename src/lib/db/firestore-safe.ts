@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { after } from "next/server";
 
 /**
  * Consultas do Firestore podem exigir índices compostos. Enquanto um índice não
@@ -23,6 +24,36 @@ export function indexLinkOf(e: unknown): string | null {
   return m ? m[0].replace(/[).,]+$/, "") : null;
 }
 
+/**
+ * Autorreparo: ao detectar índice ausente, tenta criá-lo em segundo plano (depois
+ * da resposta). Uma tentativa por instância a cada 10 minutos; criar índice é
+ * idempotente e não custa nada no plano gratuito.
+ */
+let lastRepair = 0;
+let repairing = false;
+function scheduleIndexRepair() {
+  const now = Date.now();
+  if (repairing || now - lastRepair < 10 * 60_000) return;
+  repairing = true;
+  lastRepair = now;
+  const run = async () => {
+    try {
+      const { createMissingIndexes } = await import("./index-admin");
+      const r = await createMissingIndexes();
+      console.log("[firestore] autocriação de índices:", JSON.stringify(r));
+    } catch (e) {
+      console.warn("[firestore] autocriação de índices falhou:", e instanceof Error ? e.message : e);
+    } finally {
+      repairing = false;
+    }
+  };
+  try {
+    after(run);
+  } catch {
+    void run();
+  }
+}
+
 /** Executa a consulta; se faltar índice, registra o aviso e devolve o valor de reserva. */
 export async function safeQuery<T>(label: string, run: () => Promise<T>, fallback: T): Promise<T> {
   try {
@@ -32,6 +63,7 @@ export async function safeQuery<T>(label: string, run: () => Promise<T>, fallbac
     const link = indexLinkOf(e);
     pending().set(`${label}|${link ?? ""}`, { label, link });
     console.warn(`[firestore] índice ausente em "${label}"${link ? `: ${link}` : ""}`);
+    scheduleIndexRepair();
     return fallback;
   }
 }

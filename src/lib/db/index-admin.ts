@@ -64,8 +64,10 @@ export async function createMissingIndexes(): Promise<{ created: number; existin
   const missing = status.items.filter((i) => i.state === "MISSING");
   const failed: { index: string; error: string }[] = [];
   let created = 0;
+  if (missing.length === 0) return { created: 0, existing: status.items.length, failed };
   const bearer = `Bearer ${await token()}`;
-  for (const i of missing) {
+  // Em paralelo: a criação é rápida e o conjunto é pequeno e conhecido.
+  const results = await Promise.all(missing.map(async (i) => {
     const url = `${API}/projects/${projectId()}/databases/(default)/collectionGroups/${i.collectionGroup}/indexes`;
     const res = await fetch(url, {
       method: "POST",
@@ -73,9 +75,12 @@ export async function createMissingIndexes(): Promise<{ created: number; existin
       body: JSON.stringify({ queryScope: i.queryScope || "COLLECTION", fields: i.fields }),
       cache: "no-store",
     });
-    if (res.ok) created++;
-    else if (res.status === 409) continue; // já existe
-    else failed.push({ index: signature(i), error: `${res.status} ${(await res.text()).slice(0, 200)}` });
+    if (res.ok || res.status === 409) return { ok: true as const, counted: res.ok };
+    return { ok: false as const, index: signature(i), error: `${res.status} ${(await res.text()).slice(0, 200)}` };
+  }));
+  for (const r of results) {
+    if (r.ok) { if (r.counted) created++; }
+    else failed.push({ index: r.index, error: r.error });
   }
   return { created, existing: status.items.length - missing.length, failed };
 }
