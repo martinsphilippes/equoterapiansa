@@ -90,6 +90,7 @@ export async function submitIntake(_p: ActionResult | null, fd: FormData): Promi
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return fail("Data de nascimento inválida.");
 
+    const entityName = config.entityName?.trim() || settings.orgName;
     const ref = Collections.intakeSubmissions().doc();
     const submission: IntakeSubmission = {
       id: ref.id,
@@ -107,6 +108,8 @@ export async function submitIntake(_p: ActionResult | null, fd: FormData): Promi
       internal: null,
       practitionerId: null,
       guardianId: null,
+      entityName,
+      entityCity: config.entityCity?.trim() || null,
       updatedAt: now,
       updatedBy: null,
     };
@@ -122,12 +125,30 @@ export async function rotateIntakeLink(_p: ActionResult | null, _fd: FormData): 
     const user = await actionUser("intake.manage");
     const token = randomBytes(9).toString("base64url");
     const previous = await getIntakeConfig();
+    // merge: renovar o endereço não pode apagar instituição, cidade e mensagem.
     await Collections.intakeConfig().doc("general").set({
-      id: "general", token, active: true, intro: previous.intro ?? "", updatedAt: Date.now(), updatedBy: user.id,
-    });
+      id: "general", token, active: true, updatedAt: Date.now(), updatedBy: user.id,
+    }, { merge: true });
     await audit(actorOf(user), { action: "intake.link.rotate", entity: "intake", entityId: "general", entityLabel: "Link do formulário público", details: { hadPrevious: !!previous.token } });
     revalidatePath("/cadastros");
     return success(previous.token ? "Link novo gerado. O anterior deixou de funcionar." : "Link criado.");
+  });
+}
+
+/** Instituição dona dos documentos e mensagem de abertura do formulário. */
+export async function updateIntakeSettings(_p: ActionResult | null, fd: FormData): Promise<ActionResult> {
+  return guard(async () => {
+    const user = await actionUser("intake.manage");
+    const before = await getIntakeConfig();
+    const after = {
+      entityName: (opt(fd, "entityName") ?? "").slice(0, 120),
+      entityCity: (opt(fd, "entityCity") ?? "").slice(0, 120),
+      intro: (opt(fd, "intro") ?? "").slice(0, 600),
+    };
+    await Collections.intakeConfig().doc("general").set({ id: "general", ...after, updatedAt: Date.now(), updatedBy: user.id }, { merge: true });
+    await audit(actorOf(user), { action: "intake.settings", entity: "intake", entityId: "general", entityLabel: "Formulário público", details: { before: { entityName: before.entityName, entityCity: before.entityCity, intro: before.intro }, after } });
+    revalidatePath("/cadastros");
+    return success("Configuração salva. Vale para as próximas fichas enviadas.");
   });
 }
 
@@ -199,7 +220,7 @@ export async function convertIntake(_p: ActionResult | null, fd: FormData): Prom
       a.apt_seguranca ? `Segurança: ${a.apt_seguranca}` : "",
       a.seg_equipamento ? `Equipamento/adaptação: ${a.seg_equipamento}` : "",
       a.seg_observacoes ? `Observações: ${a.seg_observacoes}` : "",
-      `Ficha pública ${sub.protocol}.`,
+      `Ficha pública ${sub.protocol}${sub.entityName ? ` · ${sub.entityName}` : ""}.`,
     ].filter(Boolean).join("\n");
 
     const practitioner: Practitioner = {

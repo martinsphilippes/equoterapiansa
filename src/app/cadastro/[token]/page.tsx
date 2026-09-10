@@ -13,12 +13,14 @@ export default async function PublicIntakePage({ params }: { params: Params<{ to
   const { token } = await params;
   const [config, settings] = await Promise.all([configForToken(token), getSettings()]);
   if (!config) notFound();
+  const entityName = config.entityName?.trim() || settings.orgName;
+  const ownBrand = entityName === settings.orgName;
   return (
     <div className="min-h-dvh bg-surface-50">
       <header className="bg-surface border-b border-border">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
-          <BrandLockup compact />
-          <span className="text-xs text-ink-500 text-right">{settings.orgName}</span>
+          {ownBrand ? <BrandLockup compact /> : <span className="font-extrabold text-ink-900">{entityName}</span>}
+          <span className="text-xs text-ink-500 text-right">{config.entityCity || (ownBrand ? "" : settings.orgName)}</span>
         </div>
       </header>
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-5">
@@ -28,10 +30,10 @@ export default async function PublicIntakePage({ params }: { params: Params<{ to
             {config.intro || "Três documentos em um só preenchimento: cadastro e saúde, autorização de imagem e termo de ciência. A identificação é pedida uma única vez."}
           </p>
         </div>
-        <IntakeForm token={token} today={todayISO(settings.timezone)} orgName={settings.orgName} />
+        <IntakeForm token={token} today={todayISO(settings.timezone)} orgName={entityName} />
       </main>
       <footer className="max-w-3xl mx-auto px-4 pb-10 pt-2 text-xs text-ink-500">
-        {settings.orgName} · Os dados informados são usados para cadastro, planejamento das atividades e segurança do praticante.
+        {entityName}{config.entityCity ? ` · ${config.entityCity}` : ""} · Os dados informados são usados para cadastro, planejamento das atividades e segurança do praticante.
       </footer>
     </div>
   );

@@ -41,7 +41,9 @@ function Signatures({ submission }: { submission: IntakeSubmission }) {
 }
 
 /** Os três documentos preenchidos, na ordem do papel. É esta marcação que sai na impressão. */
-export function IntakeDocument({ submission, orgName, today }: { submission: IntakeSubmission; orgName: string; today: string }) {
+export function IntakeDocument({ submission, orgName: fallbackOrg, today }: { submission: IntakeSubmission; orgName: string; today: string }) {
+  // A instituição gravada no envio prevalece: reimprimir uma ficha antiga não pode trocar o nome do termo.
+  const orgName = submission.entityName?.trim() || fallbackOrg;
   const a = submission.answers;
   const age = submission.birthDate ? ageOn(submission.birthDate, today) : null;
   const allowsImage = a.img_autoriza === "sim";
@@ -129,7 +131,7 @@ export function IntakeDocument({ submission, orgName, today }: { submission: Int
       )}
 
       <footer className="hidden print:block mt-6 pt-3 border-t border-border text-xs text-ink-500">
-        {orgName} · ficha {submission.protocol} · impresso em {isoToBR(today)}
+        {orgName}{submission.entityCity ? ` · ${submission.entityCity}` : ""} · ficha {submission.protocol} · impresso em {isoToBR(today)}
       </footer>
     </article>
   );

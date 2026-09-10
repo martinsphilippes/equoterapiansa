@@ -427,6 +427,9 @@ export interface IntakeSubmission {
   } | null;
   practitionerId?: string | null;
   guardianId?: string | null;
+  /** Instituição vigente no envio: o documento impresso não muda se a configuração mudar depois. */
+  entityName?: string | null;
+  entityCity?: string | null;
   updatedAt: number;
   updatedBy?: string | null;
 }
@@ -438,6 +441,10 @@ export interface IntakeConfig {
   active: boolean;
   /** Mensagem opcional exibida no topo do formulário público. */
   intro?: string;
+  /** Instituição dona dos documentos. Vazio usa o nome configurado do sistema. */
+  entityName?: string;
+  /** Cidade e estado impressos ao pé dos documentos. */
+  entityCity?: string;
   updatedAt: number;
   updatedBy?: string | null;
 }

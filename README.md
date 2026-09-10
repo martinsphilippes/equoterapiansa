@@ -95,6 +95,8 @@ Financeiro: `financialCategories`, `costCenters`, `financialAccounts`, `paymentM
 
 ## Ficha pública (formulário de cadastro, saúde e aptidão)
 
+Os documentos podem pertencer a outra instituição que não a configurada no sistema: em *Fichas* define-se o nome e a cidade que aparecem no formulário, nos termos e na impressão. Cada ficha guarda o nome vigente no envio, então reimprimir uma ficha antiga não troca o nome do termo, e o praticante convertido registra a origem. Quando a instituição é a própria, a marca do sistema aparece no cabeçalho; quando é outra, aparece só o nome dela.
+
 O link reúne três documentos em um preenchimento só: cadastro/saúde/aptidão, autorização de imagem e voz (opcional) e termo de ciência e responsabilidade. A identificação é pedida uma única vez e repetida nos demais na impressão, como no papel. O link é gerado em *Fichas* pelo Dono ou por quem tem `intake.manage`, e pode ser aberto, fechado ou renovado a qualquer momento. Quem recebe o endereço preenche sem senha: a seção do responsável legal aparece sozinha quando a data de nascimento indica menor de idade, cada pergunta de saúde só pede observação quando a resposta é sim, e o envio devolve um protocolo.
 
 A ficha cai na lista interna, com destaque para menores e para quantas respostas de saúde vieram marcadas. Na tela da ficha a equipe registra a conferência (documentação médica, atestado, necessidade de acompanhamento), imprime o documento completo em PDF pelo navegador e converte em praticante com um clique, criando junto o responsável legal e levando os alertas de saúde para as informações visíveis à equipe.

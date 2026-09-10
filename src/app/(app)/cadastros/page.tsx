@@ -4,6 +4,8 @@ import { requirePermission } from "@/lib/auth/session";
 import { getIntakeConfig, listSubmissions } from "@/lib/db/queries/intake";
 import { Badge, Card, EmptyState, PageHeader, Stat } from "@/components/ui";
 import { IntakeLinkCard } from "@/components/intake/IntakeLinkCard";
+import { IntakeSettingsCard } from "@/components/intake/IntakeSettingsCard";
+import { getSettings } from "@/lib/db/settings";
 import { formatDateTime } from "@/lib/domain/dates";
 import { formatPhone } from "@/lib/domain/format";
 import type { IntakeStatus } from "@/lib/db/types";
@@ -22,7 +24,7 @@ export default async function IntakeListPage({ searchParams }: { searchParams: S
   await requirePermission("intake.manage");
   const sp = await searchParams;
   const status = (sp1(sp, "situacao") ?? "new") as IntakeStatus | "all";
-  const [config, items, h] = await Promise.all([getIntakeConfig(), listSubmissions(status), headers()]);
+  const [config, items, h, settings] = await Promise.all([getIntakeConfig(), listSubmissions(status), headers(), getSettings()]);
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
   const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const publicUrl = config.token ? `${proto}://${host}/cadastro/${config.token}` : "";
@@ -31,7 +33,10 @@ export default async function IntakeListPage({ searchParams }: { searchParams: S
   return (
     <div className="space-y-5">
       <PageHeader title="Fichas recebidas" subtitle="Cadastros preenchidos pelo formulário público, antes de virarem praticantes." />
-      <IntakeLinkCard token={config.token} active={config.active} url={publicUrl} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <IntakeLinkCard token={config.token} active={config.active} url={publicUrl} />
+        <IntakeSettingsCard entityName={config.entityName} entityCity={config.entityCity} intro={config.intro} orgName={settings.orgName} />
+      </div>
 
       <div className="flex flex-wrap gap-2 no-print">
         {TABS.map(([v, label]) => (

@@ -24,6 +24,12 @@ try {
     await page.click('button:has-text("Gerar link")');
     await page.waitForSelector("text=Copiar link", { timeout: 60000 });
   }
+  // instituição própria dos documentos: empresa paralela
+  await page.fill('input[name="entityName"]', "Equitação Vida");
+  await page.fill('input[name="entityCity"]', "Ituiutaba – Minas Gerais");
+  await page.click('button:has-text("Salvar")');
+  await page.waitForSelector("text=Configuração salva", { timeout: 60000 });
+  await page.reload();
   const url = (await page.textContent("code")).trim();
   const token = url.split("/cadastro/")[1];
   if (!token) throw new Error("token não encontrado: " + url);
@@ -37,7 +43,9 @@ try {
   const r = await p2.goto(`${BASE}/cadastro/${token}`);
   if (r.status() !== 200) throw new Error("formulário público respondeu " + r.status());
   if (p2.url().includes("/entrar")) throw new Error("formulário público exigiu login");
-  step("formulário abre sem login");
+  await p2.waitForSelector("text=Equitação Vida");
+  if (await p2.$("text=Utilizar corretamente os equipamentos de segurança indicados pela Equitação Vida.") === null) throw new Error("nome da instituição não entrou nos termos");
+  step("formulário abre sem login e usa o nome da instituição dos documentos");
 
   await p2.fill('input[name="nome"]', "Miguel Ficha " + RUN);
   await p2.fill('input[name="nascimento"]', "2016-04-10");
@@ -92,6 +100,7 @@ try {
   await page.waitForSelector("text=Comprometo-me a:");
   await page.waitForSelector("text=Permanecer nos locais autorizados e respeitar as orientações de segurança da instituição.");
   await page.waitForSelector("text=Chega sempre 10 minutos antes.");
+  await page.waitForSelector("text=Comprometo-me a seguir todas as orientações de segurança fornecidas pela Equitação Vida");
   await page.waitForSelector("text=Publicações nas redes sociais e plataformas digitais da instituição");
   const graficos = await page.locator('div:has(> dt:text-is("Materiais gráficos, cartazes, folders e materiais institucionais"))').first().innerText();
   if (!graficos.includes("Não autorizado")) throw new Error("finalidade não marcada deveria sair como não autorizada: " + graficos);
@@ -141,8 +150,13 @@ try {
   const p3 = await anon2.newPage();
   const old = await p3.goto(`${BASE}/cadastro/${token}`);
   if (old.status() !== 404) throw new Error("link antigo continuou válido: " + old.status());
+  // renovar o link não pode apagar a instituição configurada
+  await page.reload();
+  const novoUrl = (await page.textContent("code")).trim();
+  await p3.goto(novoUrl, { waitUntil: "networkidle" });
+  await p3.waitForSelector("text=Equitação Vida");
   await anon2.close();
-  step("link antigo deixa de funcionar após renovar");
+  step("link antigo cai e o novo mantém a instituição configurada");
 
   console.log("FICHA OK");
 } catch (e) {
