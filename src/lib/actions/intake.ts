@@ -9,7 +9,7 @@ import { getSettings } from "@/lib/db/settings";
 import { todayISO } from "@/lib/domain/dates";
 import { configForToken, getIntakeConfig, submissionsSince } from "@/lib/db/queries/intake";
 import {
-  ALL_INTAKE_FIELDS, INTAKE_CONSENTS, INTAKE_SECTIONS, INTAKE_SIGNATURE_FIELDS, INTAKE_VERSION,
+  ALL_INTAKE_FIELDS, IMAGE_PURPOSE_IDS, INTAKE_DOCS, INTAKE_SECTIONS, INTAKE_SIGNATURE_FIELDS, INTAKE_VERSION,
   isMinorOn, type IntakeField,
 } from "@/lib/domain/intake";
 import { guard, str, opt, bool, success, fail, type ActionResult } from "./result";
@@ -71,10 +71,23 @@ export async function submitIntake(_p: ActionResult | null, fd: FormData): Promi
         if (!answers[id]) return fail(`Preencha os dados do responsável legal: ${ALL_INTAKE_FIELDS.find((f) => f.id === id)?.label}.`);
       }
     }
-    for (const f of [...INTAKE_SIGNATURE_FIELDS, ...INTAKE_CONSENTS]) {
-      if (f.required && !answers[f.id]) return fail(f.type === "consent" ? "É preciso aceitar as declarações para enviar." : `Preencha: ${f.label}.`);
+    for (const f of INTAKE_SIGNATURE_FIELDS) {
+      if (f.required && !answers[f.id]) return fail(`Preencha: ${f.label}.`);
+    }
+    for (const doc of INTAKE_DOCS) {
+      for (const c of doc.consents) {
+        if (c.required && answers[c.id] !== "sim") return fail(`É preciso aceitar as declarações de "${doc.title}" para enviar.`);
+      }
     }
     if (minor && answers.aceite_autorizacao !== "sim") return fail("Para menores de idade, a autorização do responsável é obrigatória.");
+    // Autorização de imagem é opcional: sem "sim" explícito, nada é guardado como autorizado.
+    if (answers.img_autoriza === "sim") {
+      if (answers.img_declaracao !== "sim") return fail("Para autorizar imagem e voz, confirme a leitura do documento.");
+      if (!IMAGE_PURPOSE_IDS.some((id) => answers[id] === "sim")) return fail("Marque ao menos uma finalidade da autorização de imagem, ou responda Não à autorização.");
+    } else {
+      for (const id of [...IMAGE_PURPOSE_IDS, "img_declaracao"]) delete answers[id];
+      answers.img_autoriza = "nao";
+    }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return fail("Data de nascimento inválida.");
 
     const ref = Collections.intakeSubmissions().doc();
@@ -148,6 +161,8 @@ export async function reviewIntake(_p: ActionResult | null, fd: FormData): Promi
       medicalDocs: bool(fd, "medicalDocs"),
       medicalRelease: (opt(fd, "medicalRelease") ?? "na") as "sim" | "nao" | "na",
       needsSupport: bool(fd, "needsSupport"),
+      supportDescription: opt(fd, "supportDescription"),
+      registryStatus: (opt(fd, "registryStatus") ?? "pendente") as "aprovado" | "pendente" | "avaliacao",
       notes: opt(fd, "notes"),
     };
     const before = { status: sub.status, internal: sub.internal };
@@ -201,6 +216,12 @@ export async function convertIntake(_p: ActionResult | null, fd: FormData): Prom
       additionalContacts: [a.eme_nome && `Emergência: ${a.eme_nome}${a.eme_parentesco ? ` (${a.eme_parentesco})` : ""} ${a.eme_telefone1 ?? ""} ${a.eme_telefone2 ?? ""}`.trim(), a.eme_outro && `${a.eme_outro} ${a.eme_outro_telefone ?? ""}`.trim()].filter(Boolean).join(" · ") || undefined,
       guardianIds: [],
       professionalIds: [],
+      mediaConsent: {
+        authorized: a.img_autoriza === "sim",
+        purposes: IMAGE_PURPOSE_IDS.filter((id) => a[id] === "sim"),
+        date: todayISO(settings.timezone),
+        source: `Ficha ${sub.protocol}`,
+      },
       createdAt: now,
       updatedAt: now,
       createdBy: user.id,

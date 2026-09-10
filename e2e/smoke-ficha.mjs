@@ -54,12 +54,21 @@ try {
   await p2.click('label:near(:text("Possui alergias?")) >> text=Sim');
   await p2.fill('input[name="sau_alergias_obs"]', "Alergia a poeira");
   await p2.selectOption('select[name="apt_autorizacao"]', "Sim");
+  // documento 2: autoriza imagem e escolhe finalidades
+  await p2.click('label:near(:text("Autoriza a captação e o uso de imagem e voz?")) >> text=Sim');
+  await p2.check('input[name="img_fin_atividades"]');
+  await p2.check('input[name="img_fin_redes"]');
+  await p2.check('input[name="img_declaracao"]');
+  // documento 3: ciência dos riscos
+  await p2.check('input[name="termo_ciencia"]');
   await p2.fill('input[name="assin_nome"]', "Renata Ficha " + RUN);
   await p2.fill('input[name="assin_cpf"]', "12345678901");
   await p2.selectOption('select[name="assin_qualidade"]', "Responsável legal");
   await p2.check('input[name="aceite_declaracoes"]');
   await p2.check('input[name="aceite_privacidade"]');
   await p2.check('input[name="aceite_autorizacao"]');
+  if (await p2.$('text=Autorização para captação e uso de imagem e voz') === null) throw new Error("documento de imagem não apareceu");
+  if (await p2.$('text=Termo de ciência e responsabilidade para a prática') === null) throw new Error("termo de ciência não apareceu");
   await p2.click('button:has-text("Enviar ficha")');
   await p2.waitForURL(/\/enviado/, { timeout: 60000 });
   await p2.waitForSelector("text=Ficha enviada");
@@ -76,17 +85,29 @@ try {
   await page.waitForURL(/\/cadastros\/[^/]+$/);
   await page.waitForSelector("text=Alergia a poeira");
   await page.waitForSelector(`text=${protocolo}`);
+  await page.waitForSelector("text=Autorização para captação e uso de imagem e voz");
+  await page.waitForSelector("text=Termo de ciência e responsabilidade para a prática");
+  await page.waitForSelector("text=Publicações nas redes sociais e plataformas digitais da instituição");
+  const graficos = await page.locator('div:has(> dt:text-is("Materiais gráficos, cartazes, folders e materiais institucionais"))').first().innerText();
+  if (!graficos.includes("Não autorizado")) throw new Error("finalidade não marcada deveria sair como não autorizada: " + graficos);
+  const redes = await page.locator('div:has(> dt:text-is("Publicações nas redes sociais e plataformas digitais da instituição"))').first().innerText();
+  if (!redes.includes("Autorizado") || redes.includes("Não autorizado")) throw new Error("finalidade marcada deveria sair como autorizada: " + redes);
+  step("documento traz os três termos e marca cada finalidade de imagem");
   await page.screenshot({ path: "e2e/ui-ficha-detalhe.png", fullPage: true });
   step("ficha aparece na lista e o documento traz as respostas");
 
   await page.selectOption('select[name="status"]', "reviewed");
+  await page.selectOption('select[name="registryStatus"]', "aprovado");
+  await page.fill('input[name="supportDescription"]', "Acompanhamento na montaria.");
   await page.check('input[name="medicalDocs"]');
   await page.fill('textarea[name="notes"]', "Conferido na recepção.");
   await page.click('button:has-text("Salvar conferência")');
   await page.waitForTimeout(2000);
   await page.reload();
   await page.waitForSelector("text=Conferido na recepção.");
-  step("conferência salva e registrada no documento");
+  await page.waitForSelector("text=Aprovado");
+  await page.waitForSelector("text=Acompanhamento na montaria.");
+  step("conferência salva, com status do cadastro e descrição do acompanhamento");
 
   // ----- Conversão em praticante
   page.once("dialog", (d) => d.accept());
@@ -94,6 +115,7 @@ try {
   await page.waitForURL(/\/praticantes\/[^/]+$/, { timeout: 60000 });
   await page.waitForSelector(`text=Miguel Ficha ${RUN}`);
   await page.waitForSelector("text=Alergia a poeira");
+  await page.waitForSelector("text=Autorizadas");
   const pid = page.url().split("/").pop();
   await page.goto(`${BASE}/praticantes/${pid}/responsaveis`);
   await page.waitForSelector(`text=Renata Ficha ${RUN}`);

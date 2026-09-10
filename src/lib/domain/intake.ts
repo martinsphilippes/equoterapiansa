@@ -25,8 +25,12 @@ export interface IntakeField {
   wide?: boolean;
 }
 
+export type IntakeDocId = "ficha" | "imagem" | "termo";
+
 export interface IntakeSection {
   id: string;
+  /** Documento a que a seção pertence. */
+  doc: IntakeDocId;
   title: string;
   description?: string;
   /** Texto de aviso exibido ao fim da seção (também sai na impressão). */
@@ -36,14 +40,15 @@ export interface IntakeSection {
   fields: IntakeField[];
 }
 
-export const INTAKE_VERSION = 1;
-export const INTAKE_TITLE = "Formulário de cadastro, saúde e aptidão";
+export const INTAKE_VERSION = 2;
+export const INTAKE_TITLE = "Cadastro, saúde, imagem e termo de ciência";
 
 const yesNo = (id: string, label: string, noteLabel = "Qual/observação"): IntakeField => ({ id, label, type: "yesno", note: true, noteLabel, wide: true });
 
 export const INTAKE_SECTIONS: IntakeSection[] = [
   {
     id: "aluno",
+    doc: "ficha",
     title: "Dados do praticante",
     description: "A idade é calculada pela data de nascimento.",
     fields: [
@@ -61,6 +66,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
   },
   {
     id: "responsavel",
+    doc: "ficha",
     title: "Responsável legal",
     description: "Obrigatório quando o praticante é menor de 18 anos.",
     minorOnly: true,
@@ -75,6 +81,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
   },
   {
     id: "emergencia",
+    doc: "ficha",
     title: "Contato para emergência",
     fields: [
       { id: "eme_nome", label: "Nome", type: "text", required: true, wide: true },
@@ -87,6 +94,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
   },
   {
     id: "saude",
+    doc: "ficha",
     title: "Informações de saúde",
     description: "As informações devem ser verdadeiras e atualizadas, para que a equipe conheça possíveis limitações ou cuidados necessários durante as atividades.",
     fields: [
@@ -104,6 +112,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
   },
   {
     id: "historico",
+    doc: "ficha",
     title: "Histórico de acidentes e quedas",
     fields: [
       { id: "his_praticou", label: "Já praticou equitação anteriormente?", type: "yesno", wide: true },
@@ -115,6 +124,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
   },
   {
     id: "aptidao",
+    doc: "ficha",
     title: "Aptidão para a prática",
     notice: "A prática envolve riscos inerentes à atividade e exige atenção às orientações dos profissionais responsáveis. Qualquer alteração no estado de saúde, lesão, recomendação médica ou outra condição que possa interferir na prática deverá ser comunicada antes da aula.",
     fields: [
@@ -127,6 +137,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
   },
   {
     id: "seguranca",
+    doc: "ficha",
     title: "Medidas e informações para segurança",
     fields: [
       { id: "seg_altura", label: "Altura", type: "measure", placeholder: "Ex.: 1,62 m" },
@@ -138,7 +149,24 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
       { id: "seg_observacoes", label: "Outras observações importantes", type: "textarea", wide: true },
     ],
   },
+  {
+    id: "imagem_uso",
+    doc: "imagem",
+    title: "Autorização de imagem e voz",
+    description: "A autorização é opcional e pode ser recusada sem prejuízo à participação nas atividades.",
+    fields: [
+      { id: "img_autoriza", label: "Autoriza a captação e o uso de imagem e voz?", type: "yesno", wide: true },
+      { id: "img_fin_atividades", label: "Divulgação das atividades e aulas da instituição", type: "consent", wide: true },
+      { id: "img_fin_redes", label: "Publicações nas redes sociais e plataformas digitais da instituição", type: "consent", wide: true },
+      { id: "img_fin_graficos", label: "Materiais gráficos, cartazes, folders e materiais institucionais", type: "consent", wide: true },
+      { id: "img_fin_eventos", label: "Divulgação de eventos, projetos e ações realizadas pela instituição", type: "consent", wide: true },
+      { id: "img_fin_site", label: "Site, apresentações e demais materiais de divulgação institucional", type: "consent", wide: true },
+    ],
+  },
 ];
+
+/** Finalidades da autorização de imagem, na ordem do documento. */
+export const IMAGE_PURPOSE_IDS = ["img_fin_atividades", "img_fin_redes", "img_fin_graficos", "img_fin_eventos", "img_fin_site"];
 
 /** Declarações do termo, exibidas como texto e aceitas em bloco. */
 export const INTAKE_DECLARATIONS = [
@@ -158,16 +186,90 @@ export const INTAKE_SIGNATURE_FIELDS: IntakeField[] = [
   { id: "assin_qualidade", label: "Preenchendo como", type: "choice", options: ["Próprio praticante", "Responsável legal", "Outro"], required: true },
 ];
 
-export const INTAKE_CONSENTS: IntakeField[] = [
-  { id: "aceite_declaracoes", label: "Li e concordo com as declarações acima.", type: "consent", required: true, wide: true },
-  { id: "aceite_privacidade", label: "Concordo com o uso dos dados descrito acima.", type: "consent", required: true, wide: true },
-  { id: "aceite_autorizacao", label: "Na qualidade de responsável legal, autorizo a participação do praticante nas atividades, observadas as orientações e normas de segurança da instituição.", type: "consent", wide: true },
+/**
+ * Os três documentos que a ficha reúne. A identificação é preenchida uma vez e
+ * repetida nos demais na impressão, como no papel.
+ * `{org}` é trocado pelo nome da instituição configurado no sistema.
+ */
+export interface IntakeDoc {
+  id: IntakeDocId;
+  title: string;
+  purpose: string;
+  /** Parágrafos antes dos aceites. */
+  declarations: string[];
+  /** Observações ao pé do documento. */
+  closing?: string[];
+  consents: IntakeField[];
+  /** Documento que a pessoa pode recusar sem impedir a participação. */
+  optional?: boolean;
+  /** Ainda faltam cláusulas a transcrever do documento em papel. */
+  incomplete?: boolean;
+}
+
+export const INTAKE_DOCS: IntakeDoc[] = [
+  {
+    id: "ficha",
+    title: "Formulário de cadastro, saúde e aptidão",
+    purpose: "Dados do praticante, contatos, saúde e condições para a prática.",
+    declarations: INTAKE_DECLARATIONS,
+    consents: [
+      { id: "aceite_declaracoes", label: "Li e concordo com as declarações acima.", type: "consent", required: true, wide: true },
+      { id: "aceite_privacidade", label: "Concordo com o uso dos dados descrito acima.", type: "consent", required: true, wide: true },
+      { id: "aceite_autorizacao", label: "Na qualidade de responsável legal, autorizo a participação do praticante nas atividades, observadas as orientações e normas de segurança da instituição.", type: "consent", wide: true },
+    ],
+  },
+  {
+    id: "imagem",
+    title: "Autorização para captação e uso de imagem e voz",
+    purpose: "Opcional. Recusar não impede a participação nas atividades.",
+    optional: true,
+    declarations: [
+      "Autorizo a {org} a realizar a captação de fotografias, vídeos, áudios e demais registros de imagem e voz durante as aulas, atividades, eventos, projetos e demais ações realizadas pela instituição.",
+      "Autorizo, de forma gratuita, a utilização desses registros para fins institucionais, informativos e de divulgação das atividades da {org}, incluindo materiais impressos e meios digitais.",
+      "Declaro estar ciente de que a imagem e/ou voz do praticante poderá aparecer de forma individual ou juntamente com outras pessoas nos registros realizados durante as atividades da {org}.",
+      "A presente autorização não permite a utilização da imagem ou voz para finalidade ofensiva, discriminatória ou que possa causar prejuízo à honra, à reputação ou à dignidade do praticante.",
+      "A {org} compromete-se a utilizar os registros de maneira compatível com as finalidades institucionais e de divulgação autorizadas neste documento.",
+      "A autorização é concedida por prazo indeterminado, podendo o titular ou seu responsável legal solicitar, por escrito, que novas utilizações futuras sejam interrompidas, observadas as situações em que a retirada não seja tecnicamente possível ou em que o material já tenha sido produzido, publicado ou distribuído.",
+    ],
+    closing: [
+      "Declaro que li e compreendi integralmente este documento e estou de acordo com a captação e utilização da imagem e voz nas condições aqui estabelecidas.",
+      "Declaro ainda que as informações fornecidas são verdadeiras e que possuo autorização legal para conceder este consentimento quando se tratar de praticante menor de idade.",
+    ],
+    consents: [
+      { id: "img_declaracao", label: "Li e compreendi este documento e estou de acordo com as condições acima.", type: "consent", wide: true },
+    ],
+  },
+  {
+    id: "termo",
+    title: "Termo de ciência e responsabilidade para a prática",
+    purpose: "Ciência dos riscos próprios da atividade com animais.",
+    incomplete: true,
+    declarations: [
+      "Declaro que fui devidamente informado de que a equitação é uma atividade que envolve interação direta com animais e possui riscos próprios, podendo ocorrer situações imprevisíveis, mesmo quando todas as orientações de segurança são seguidas.",
+      "Estou ciente de que o comportamento do cavalo pode sofrer alterações em razão de fatores como ambiente, clima, estímulos externos, movimentos inesperados ou outras situações próprias da atividade.",
+    ],
+    closing: [
+      "Este documento deve ser preenchido pelo praticante maior de idade ou, no caso de menor de idade, por seu responsável legal.",
+    ],
+    consents: [
+      { id: "termo_ciencia", label: "Declaro estar ciente do conteúdo deste termo e assumo o compromisso de seguir as orientações de segurança da instituição.", type: "consent", required: true, wide: true },
+    ],
+  },
 ];
+
+export function docById(id: IntakeDocId): IntakeDoc {
+  return INTAKE_DOCS.find((d) => d.id === id)!;
+}
+
+/** Troca o marcador pelo nome da instituição configurado. */
+export function withOrg(text: string, orgName: string): string {
+  return text.replaceAll("{org}", orgName);
+}
 
 export const ALL_INTAKE_FIELDS: IntakeField[] = [
   ...INTAKE_SECTIONS.flatMap((s) => s.fields),
   ...INTAKE_SIGNATURE_FIELDS,
-  ...INTAKE_CONSENTS,
+  ...INTAKE_DOCS.flatMap((d) => d.consents),
 ];
 
 export function fieldById(id: string): IntakeField | undefined {

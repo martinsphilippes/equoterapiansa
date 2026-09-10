@@ -25,10 +25,10 @@ export default async function PublicIntakePage({ params }: { params: Params<{ to
         <div>
           <h1 className="text-2xl font-extrabold text-ink-900">{INTAKE_TITLE}</h1>
           <p className="text-sm text-ink-700 mt-1">
-            {config.intro || "Preencha os dados abaixo antes da primeira aula. Leva poucos minutos e evita preencher papel na chegada."}
+            {config.intro || "Três documentos em um só preenchimento: cadastro e saúde, autorização de imagem e termo de ciência. A identificação é pedida uma única vez."}
           </p>
         </div>
-        <IntakeForm token={token} today={todayISO(settings.timezone)} />
+        <IntakeForm token={token} today={todayISO(settings.timezone)} orgName={settings.orgName} />
       </main>
       <footer className="max-w-3xl mx-auto px-4 pb-10 pt-2 text-xs text-ink-500">
         {settings.orgName} · Os dados informados são usados para cadastro, planejamento das atividades e segurança do praticante.

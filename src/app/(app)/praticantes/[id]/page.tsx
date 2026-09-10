@@ -31,9 +31,13 @@ export default async function PractitionerDataPage({ params }: { params: Params<
             { label: "Endereço", value: p.address ?? "—" },
             { label: "Entrada", value: isoToBR(p.entryDate) },
             { label: "Contatos adicionais", value: p.additionalContacts ?? "—" },
+            { label: "Imagem e voz", value: p.mediaConsent ? (p.mediaConsent.authorized ? `Autorizadas (${p.mediaConsent.source})` : `Não autorizadas (${p.mediaConsent.source})`) : "Sem registro" },
             { label: "Equipe", value: professionals.length ? professionals.map((c) => c.name).join(", ") : "Nenhum profissional atribuído" },
           ]} />
         </Card>
+        {p.mediaConsent && !p.mediaConsent.authorized && (
+          <Alert tone="warning">Imagem e voz <strong>não autorizadas</strong>. Não publique fotos ou vídeos deste praticante.</Alert>
+        )}
         {p.importantInfo && <Card title="Informações importantes"><p className="text-sm whitespace-pre-wrap">{p.importantInfo}</p></Card>}
         {hasPermission(user, "clinical.view") && (
           <Card title="Informações clínicas / terapêuticas">

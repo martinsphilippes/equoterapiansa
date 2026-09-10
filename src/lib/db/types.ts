@@ -197,6 +197,13 @@ export interface Practitioner {
   guardianIds: string[];
   /** Profissionais que acompanham este praticante (controle de acesso). */
   professionalIds: string[];
+  /** Autorização de uso de imagem e voz, como declarada na ficha. */
+  mediaConsent?: {
+    authorized: boolean;
+    purposes: string[];
+    date: ISODate;
+    source: string;
+  } | null;
   /** Resumo mantido pelas actions de avaliação (evita varrer a coleção no painel). */
   assessmentSummary?: { count: number; lastDate: ISODate | null; lastCreatedAt: number } | null;
   /** Data (ms) do último relatório gerado. */
@@ -412,6 +419,10 @@ export interface IntakeSubmission {
     medicalDocs?: boolean;
     medicalRelease?: "sim" | "nao" | "na";
     needsSupport?: boolean;
+    /** Descrição do acompanhamento ou adaptação necessária. */
+    supportDescription?: string;
+    /** Avaliação do cadastro pela equipe, como no papel. */
+    registryStatus?: "aprovado" | "pendente" | "avaliacao";
     notes?: string;
   } | null;
   practitionerId?: string | null;

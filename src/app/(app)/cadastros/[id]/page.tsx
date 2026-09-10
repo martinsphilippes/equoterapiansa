@@ -4,7 +4,7 @@ import { requirePermission, hasPermission } from "@/lib/auth/session";
 import { getSubmission } from "@/lib/db/queries/intake";
 import { getSettings } from "@/lib/db/settings";
 import { todayISO } from "@/lib/domain/dates";
-import { Badge, Card, Checkbox, Field, LinkButton, PageHeader, Select, Textarea } from "@/components/ui";
+import { Alert, Badge, Card, Checkbox, Field, Input, LinkButton, PageHeader, Select, Textarea } from "@/components/ui";
 import { ActionForm } from "@/components/ui/ActionForm";
 import { SubmitButton } from "@/components/ui/FormStatus";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
@@ -34,6 +34,10 @@ export default async function IntakeDetailPage({ params }: { params: Params<{ id
         />
       </div>
 
+      {submission.answers.img_autoriza !== "sim" && (
+        <div className="no-print"><Alert tone="warning">Imagem e voz <strong>não autorizadas</strong> nesta ficha. Não publique fotos deste praticante.</Alert></div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2">
           <IntakeDocument submission={submission} orgName={settings.orgName} today={today} />
@@ -58,7 +62,13 @@ export default async function IntakeDetailPage({ params }: { params: Params<{ id
                 </Select>
               </Field>
               <Checkbox name="needsSupport" value="1" label="Necessita acompanhamento ou adaptação" defaultChecked={submission.internal?.needsSupport} />
-              <Field label="Observações internas"><Textarea name="notes" defaultValue={submission.internal?.notes ?? ""} className="min-h-20" /></Field>
+              <Field label="Descrição do acompanhamento ou adaptação"><Input name="supportDescription" defaultValue={submission.internal?.supportDescription ?? ""} /></Field>
+              <Field label="Status do cadastro">
+                <Select name="registryStatus" defaultValue={submission.internal?.registryStatus ?? "pendente"}>
+                  <option value="pendente">Pendente</option><option value="aprovado">Aprovado</option><option value="avaliacao">Necessita avaliação</option>
+                </Select>
+              </Field>
+              <Field label="Observações da equipe"><Textarea name="notes" defaultValue={submission.internal?.notes ?? ""} className="min-h-20" /></Field>
               <SubmitButton>Salvar conferência</SubmitButton>
             </ActionForm>
           </Card>

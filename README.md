@@ -95,9 +95,11 @@ Financeiro: `financialCategories`, `costCenters`, `financialAccounts`, `paymentM
 
 ## Ficha pública (formulário de cadastro, saúde e aptidão)
 
-O link é gerado em *Fichas* pelo Dono ou por quem tem `intake.manage`, e pode ser aberto, fechado ou renovado a qualquer momento. Quem recebe o endereço preenche sem senha: a seção do responsável legal aparece sozinha quando a data de nascimento indica menor de idade, cada pergunta de saúde só pede observação quando a resposta é sim, e o envio devolve um protocolo.
+O link reúne três documentos em um preenchimento só: cadastro/saúde/aptidão, autorização de imagem e voz (opcional) e termo de ciência e responsabilidade. A identificação é pedida uma única vez e repetida nos demais na impressão, como no papel. O link é gerado em *Fichas* pelo Dono ou por quem tem `intake.manage`, e pode ser aberto, fechado ou renovado a qualquer momento. Quem recebe o endereço preenche sem senha: a seção do responsável legal aparece sozinha quando a data de nascimento indica menor de idade, cada pergunta de saúde só pede observação quando a resposta é sim, e o envio devolve um protocolo.
 
 A ficha cai na lista interna, com destaque para menores e para quantas respostas de saúde vieram marcadas. Na tela da ficha a equipe registra a conferência (documentação médica, atestado, necessidade de acompanhamento), imprime o documento completo em PDF pelo navegador e converte em praticante com um clique, criando junto o responsável legal e levando os alertas de saúde para as informações visíveis à equipe.
+
+A autorização de imagem pode ser recusada sem impedir a participação, e as cinco finalidades saem listadas uma a uma no documento impresso. A recusa vira alerta na ficha e no cadastro do praticante, para ninguém publicar foto por engano.
 
 O formulário é declarado como dados em `src/lib/domain/intake.ts`: a tela pública, a validação no servidor e a versão impressa leem o mesmo esquema, e cada ficha guarda a versão com que foi preenchida. Proteções do endereço aberto: token no link, campo-isca, limite de envios por hora e nenhuma leitura de dados exposta.
 
