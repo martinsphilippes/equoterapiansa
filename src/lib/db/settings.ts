@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { db } from "@/lib/firebase/admin";
+import { col } from "./collections";
 import type { Settings } from "./types";
 import { DEFAULT_SCHEDULE } from "@/lib/domain/time";
 import { DEFAULT_TZ } from "@/lib/domain/dates";
@@ -25,7 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
   updatedAt: 0,
 };
 
-export const settingsRef = () => db.collection("settings").doc("general");
+export const settingsRef = () => col("settings").doc("general");
 
 /** Lidas uma única vez por requisição (layout, página e actions compartilham). */
 export const getSettings = cache(async (): Promise<Settings> => {

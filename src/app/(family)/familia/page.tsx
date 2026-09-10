@@ -13,7 +13,8 @@ import { isoToBR, todayISO, weekdayLabel } from "@/lib/domain/dates";
 export const metadata = { title: "Área da família" };
 
 export default async function FamilyHome() {
-  const [{ user, guardian, practitioners }, settings] = await Promise.all([requireGuardian(), getSettings()]);
+  const { user, guardian, practitioners } = await requireGuardian();
+  const settings = await getSettings();
   const today = todayISO(settings.timezone);
   const cards = await Promise.all(practitioners.map(async (p) => {
     const appts = await appointmentsOfPractitioner(p.id);

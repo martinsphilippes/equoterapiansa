@@ -2,6 +2,12 @@
 import { revalidatePath } from "next/cache";
 import { adminAuth, db } from "@/lib/firebase/admin";
 import { actionUser, actorOf } from "@/lib/auth/session";
+import { DEFAULT_ORG_ID } from "@/lib/db/org-context";
+
+/** Unidade em uso por quem está criando o acesso. */
+function orgOf(user: UserProfile): string {
+  return user.activeOrgId || user.orgId || DEFAULT_ORG_ID;
+}
 import { Collections, getDoc } from "@/lib/db/collections";
 import { audit } from "@/lib/db/audit";
 import { ALL_PERMISSIONS, DEFAULT_PERMISSIONS, type Permission, type Role } from "@/lib/auth/permissions";
@@ -18,7 +24,7 @@ function randomPassword() {
   return out;
 }
 
-async function createAccessUser(opts: { email: string; name: string; role: Role; collaboratorId?: string; guardianId?: string; password?: string; permissions?: Permission[] }) {
+async function createAccessUser(opts: { email: string; name: string; role: Role; orgId: string; collaboratorId?: string; guardianId?: string; password?: string; permissions?: Permission[] }) {
   const password = opts.password && opts.password.length >= 8 ? opts.password : randomPassword();
   let uid: string;
   try {
@@ -41,6 +47,8 @@ async function createAccessUser(opts: { email: string; name: string; role: Role;
   const now = Date.now();
   const profile: UserProfile = {
     id: uid, email: opts.email, name: opts.name, role: opts.role,
+    // A pessoa nasce presa à unidade em que foi criada: é o que separa as empresas.
+    orgId: opts.orgId, orgIds: [],
     permissions: opts.permissions ?? DEFAULT_PERMISSIONS[opts.role],
     collaboratorId: opts.collaboratorId, guardianId: opts.guardianId,
     active: true, mustChangePassword: true, createdAt: now, updatedAt: now,
@@ -62,7 +70,7 @@ export async function grantCollaboratorAccess(_prev: ActionResult | null, fd: Fo
     if (c.userId) return fail("Este colaborador já possui acesso.");
     const email = (str(fd, "email") || c.email || "").toLowerCase();
     if (!email) return fail("Informe um e-mail para o acesso.");
-    const { uid, password } = await createAccessUser({ email, name: c.name, role, collaboratorId, password: str(fd, "password") || undefined });
+    const { uid, password } = await createAccessUser({ email, name: c.name, role, orgId: orgOf(user), collaboratorId, password: str(fd, "password") || undefined });
     const batch = db.batch();
     batch.set(Collections.collaborators().doc(collaboratorId), { userId: uid, email, updatedAt: Date.now(), updatedBy: user.id }, { merge: true });
     await audit(actorOf(user), { action: "user.create", entity: "user", entityId: uid, entityLabel: c.name, details: { role, collaboratorId } }, batch);
@@ -94,7 +102,7 @@ export async function createStaffAccess(_prev: ActionResult | null, fd: FormData
     const now = Date.now();
     const ref = Collections.collaborators().doc();
     // O acesso vem primeiro: se o e-mail já estiver em uso, nada é gravado no banco.
-    const { uid, password } = await createAccessUser({ email, name, role, collaboratorId: ref.id, password: str(fd, "password") || undefined });
+    const { uid, password } = await createAccessUser({ email, name, role, orgId: orgOf(user), collaboratorId: ref.id, password: str(fd, "password") || undefined });
     const collaborator: Collaborator = {
       id: ref.id, name, email, jobRoleId: jobRole?.id, jobRoleName: jobRole?.name,
       payType: "monthly", status: "active", admissionDate: todayISO(settings.timezone),
@@ -119,7 +127,7 @@ export async function grantGuardianAccess(_prev: ActionResult | null, fd: FormDa
     if (g.userId) return fail("Este responsável já possui acesso.");
     const email = (str(fd, "email") || g.email || "").toLowerCase();
     if (!email) return fail("Informe um e-mail para o acesso.");
-    const { uid, password } = await createAccessUser({ email, name: g.name, role: "guardian", guardianId, password: str(fd, "password") || undefined });
+    const { uid, password } = await createAccessUser({ email, name: g.name, role: "guardian", orgId: orgOf(user), guardianId, password: str(fd, "password") || undefined });
     const batch = db.batch();
     batch.set(Collections.guardians().doc(guardianId), { userId: uid, email, appAccess: true, updatedAt: Date.now() }, { merge: true });
     await audit(actorOf(user), { action: "user.create", entity: "user", entityId: uid, entityLabel: g.name, details: { role: "guardian", guardianId } }, batch);

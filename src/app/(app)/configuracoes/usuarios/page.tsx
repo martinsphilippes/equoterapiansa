@@ -9,18 +9,25 @@ import { ROLE_LABELS } from "@/lib/auth/permissions";
 import { PermissionsEditor } from "@/components/settings/PermissionsEditor";
 import { AddUserForm } from "@/components/settings/AddUserForm";
 import { listCollaborators } from "@/lib/db/queries/collaborators";
+import { listOrganizations } from "@/lib/db/queries/orgs";
+import { DEFAULT_ORG_ID } from "@/lib/db/org-context";
+import { UserOrgForm } from "@/components/settings/UserOrgForm";
 
 export default async function UsersPage() {
   const me = await requirePermission("users.manage");
-  const [users, collaborators, guardianDocs, jobRoleDocs] = await Promise.all([
+  const [users, collaborators, guardianDocs, jobRoleDocs, orgs] = await Promise.all([
     mapDocs(await Collections.users().get()),
     listCollaborators({ status: "active" }),
     mapDocs(await Collections.guardians().get()),
     mapDocs(await Collections.jobRoles().get()),
+    listOrganizations(),
   ]);
+  const orgName = (id?: string) => orgs.find((o) => o.id === (id || DEFAULT_ORG_ID))?.name ?? (id || DEFAULT_ORG_ID);
+  // Só a unidade em uso: usuários de outra empresa não aparecem aqui.
+  const mine = (u: { orgId?: string }) => (u.orgId || DEFAULT_ORG_ID) === (me.activeOrgId || DEFAULT_ORG_ID);
   users.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
-  const staff = users.filter((u) => u.role !== "guardian");
-  const guardians = users.filter((u) => u.role === "guardian");
+  const staff = users.filter((u) => u.role !== "guardian" && mine(u));
+  const guardians = users.filter((u) => u.role === "guardian" && mine(u));
   const freeCollaborators = collaborators.filter((c) => !c.userId).map((c) => ({ id: c.id, name: c.name, email: c.email, hint: c.jobRoleName }));
   const freeGuardians = guardianDocs.filter((g) => !g.userId).sort((a, b) => a.name.localeCompare(b.name, "pt-BR")).map((g) => ({ id: g.id, name: g.name, email: g.email, hint: g.relationship }));
   const jobRoles = jobRoleDocs.sort((a, b) => a.name.localeCompare(b.name, "pt-BR")).map((j) => ({ id: j.id, name: j.name }));
@@ -34,7 +41,7 @@ export default async function UsersPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="font-medium">{u.name} {u.id === me.id && <span className="text-xs text-ink-500">(você)</span>}</p>
-                  <p className="text-sm text-ink-500">{u.email} · {ROLE_LABELS[u.role]}</p>
+                  <p className="text-sm text-ink-500">{u.email} · {ROLE_LABELS[u.role]} · {orgName(u.orgId)}{u.orgIds?.length ? ` (+${u.orgIds.length})` : ""}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {u.active ? <Badge tone="green">Ativo</Badge> : <Badge tone="red">Desativado</Badge>}
@@ -47,7 +54,10 @@ export default async function UsersPage() {
                 </div>
               </div>
               {me.role === "owner" && u.role !== "owner" && (
-                <PermissionsEditor userId={u.id} role={u.role} current={effectivePermissions(u)} />
+                <>
+                  <PermissionsEditor userId={u.id} role={u.role} current={effectivePermissions(u)} />
+                  {orgs.length > 1 && <UserOrgForm userId={u.id} orgId={u.orgId ?? DEFAULT_ORG_ID} extras={u.orgIds ?? []} orgs={orgs.map((o) => ({ id: o.id, name: o.name }))} />}
+                </>
               )}
             </li>
           ))}

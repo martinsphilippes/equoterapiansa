@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser, canAccessPractitioner, hasAny } from "@/lib/auth/session";
+import { getCurrentUser, canAccessPractitioner, hasAny, bindOrg } from "@/lib/auth/session";
 import { Collections, getDoc } from "@/lib/db/collections";
 import { readFile } from "@/lib/files/store";
+import { withOrgScope } from "@/lib/db/org-context";
 import { audit } from "@/lib/db/audit";
 
 /** Entrega um arquivo armazenado (documento ou foto), após verificar permissão. */
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  return withOrgScope(async () => {
   const { id } = await ctx.params;
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  bindOrg(user); // arquivos vivem na coleção da unidade: um id de outra empresa não existe aqui
 
   let fileId: string;
   let fileName = "arquivo";
@@ -44,5 +47,6 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
       "Content-Disposition": `inline; filename="${encodeURIComponent(fileName)}"`,
       "Cache-Control": "private, max-age=60",
     },
+  });
   });
 }

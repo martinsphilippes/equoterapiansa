@@ -8,7 +8,8 @@ import { isoToBR, todayISO, weekdayLabel } from "@/lib/domain/dates";
 
 export default async function FamilyAgendaPage({ params }: { params: Promise<{ pid: string }> }) {
   const { pid } = await params;
-  const [, settings] = await Promise.all([requireGuardianPractitioner(pid), getSettings()]);
+  await requireGuardianPractitioner(pid);
+  const settings = await getSettings();
   const appts = await appointmentsOfPractitioner(pid);
   const today = todayISO(settings.timezone);
   const upcoming = appts.filter((a) => a.date >= today && (a.status === "scheduled" || a.status === "confirmed"));

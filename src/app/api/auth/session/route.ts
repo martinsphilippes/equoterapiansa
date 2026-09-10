@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { adminAuth } from "@/lib/firebase/admin";
 import { Collections } from "@/lib/db/collections";
-import { SESSION_COOKIE, SESSION_DAYS } from "@/lib/auth/session";
+import { ORG_COOKIE, SESSION_COOKIE, SESSION_DAYS } from "@/lib/auth/session";
 
 /** Troca o ID token (login no cliente) por um cookie de sessão httpOnly. */
 export async function POST(req: Request) {
@@ -24,6 +24,8 @@ export async function POST(req: Request) {
       path: "/",
       maxAge: expiresIn / 1000,
     });
+    // Zera a unidade escolhida: quem entra agora pode ser de outra empresa.
+    store.delete(ORG_COOKIE);
     const role = profile.data()?.role;
     return NextResponse.json({ ok: true, role, mustChangePassword: !!profile.data()?.mustChangePassword });
   } catch {

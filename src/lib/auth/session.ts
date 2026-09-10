@@ -4,10 +4,12 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { adminAuth } from "@/lib/firebase/admin";
 import { Collections } from "@/lib/db/collections";
+import { DEFAULT_ORG_ID, enterOrg, orgScope } from "@/lib/db/org-context";
 import type { UserProfile, Practitioner } from "@/lib/db/types";
 import { DEFAULT_PERMISSIONS, type Permission, type Role } from "./permissions";
 
 export const SESSION_COOKIE = "__session";
+export const ORG_COOKIE = "__org";
 export const SESSION_DAYS = 5;
 
 export class AuthError extends Error {
@@ -17,8 +19,19 @@ export class AuthError extends Error {
   }
 }
 
-/** Usuário logado (verificação do cookie de sessão + perfil no Firestore). Cacheado por request. */
-export const getCurrentUser = cache(async (): Promise<UserProfile | null> => {
+/** Unidades a que a pessoa tem acesso, a primeira sendo a dela. */
+export function orgsOf(profile: Pick<UserProfile, "orgId" | "orgIds">): string[] {
+  const primary = profile.orgId || DEFAULT_ORG_ID;
+  const extra = (profile.orgIds ?? []).filter((o) => o && o !== primary);
+  return [primary, ...extra];
+}
+
+/**
+ * Usuário logado (cookie de sessão + perfil) e a unidade ativa. Cacheado por
+ * requisição. A unidade ativa vem do cookie somente se a pessoa tiver acesso a
+ * ela; qualquer outro valor cai para a unidade dela.
+ */
+async function loadCurrentUser(): Promise<UserProfile | null> {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;
@@ -28,11 +41,39 @@ export const getCurrentUser = cache(async (): Promise<UserProfile | null> => {
     if (!snap.exists) return null;
     const profile = { ...(snap.data() as UserProfile), id: snap.id };
     if (!profile.active) return null;
+    const allowed = orgsOf(profile);
+    const wanted = store.get(ORG_COOKIE)?.value;
+    profile.activeOrgId = wanted && allowed.includes(wanted) ? wanted : allowed[0];
+    enterOrg(profile.activeOrgId);
     return profile;
   } catch {
     return null;
   }
-});
+}
+
+const cachedCurrentUser = cache(loadCurrentUser);
+
+/**
+ * Uma leitura de sessão por requisição. Em telas o cache do React resolve; em
+ * ações e rotas o escopo aberto por `withOrgScope` guarda a mesma promessa,
+ * porque ali o cache do React não tem escopo de requisição.
+ */
+export function getCurrentUser(): Promise<UserProfile | null> {
+  const scope = orgScope();
+  if (!scope) return cachedCurrentUser();
+  if (!scope.user) scope.user = loadCurrentUser();
+  return scope.user as Promise<UserProfile | null>;
+}
+
+/**
+ * Entra na unidade do usuário. Chamado por toda porta de entrada (páginas,
+ * ações e rotas), porque o React pode renderizar layout e página em contextos
+ * assíncronos irmãos, e cada um precisa do seu contexto de unidade.
+ */
+export function bindOrg(user: UserProfile): UserProfile {
+  enterOrg(user.activeOrgId || user.orgId || DEFAULT_ORG_ID);
+  return user;
+}
 
 export function effectivePermissions(user: Pick<UserProfile, "role" | "permissions">): Permission[] {
   if (user.role === "owner") return DEFAULT_PERMISSIONS.owner;
@@ -52,7 +93,7 @@ export function hasAny(user: UserProfile, ps: Permission[]): boolean {
 export async function requireUser(): Promise<UserProfile> {
   const user = await getCurrentUser();
   if (!user) redirect("/entrar");
-  return user;
+  return bindOrg(user);
 }
 
 export async function requireStaff(): Promise<UserProfile> {
@@ -72,6 +113,7 @@ export async function requirePermission(p: Permission | Permission[]): Promise<U
 export async function actionUser(p?: Permission | Permission[]): Promise<UserProfile> {
   const user = await getCurrentUser();
   if (!user) throw new AuthError("Sessão expirada. Entre novamente.");
+  bindOrg(user);
   if (p) {
     const list = Array.isArray(p) ? p : [p];
     if (!hasAny(user, list)) throw new AuthError();

@@ -8,6 +8,7 @@ import { actionUser, actorOf } from "@/lib/auth/session";
 import { getSettings } from "@/lib/db/settings";
 import { todayISO } from "@/lib/domain/dates";
 import { configForToken, getIntakeConfig, submissionsSince } from "@/lib/db/queries/intake";
+import { DEFAULT_ORG_ID } from "@/lib/db/org-context";
 import {
   ALL_INTAKE_FIELDS, IMAGE_PURPOSE_IDS, INTAKE_DOCS, INTAKE_SECTIONS, INTAKE_SIGNATURE_FIELDS, INTAKE_VERSION,
   isMinorOn, type IntakeField,
@@ -125,10 +126,14 @@ export async function rotateIntakeLink(_p: ActionResult | null, _fd: FormData): 
     const user = await actionUser("intake.manage");
     const token = randomBytes(9).toString("base64url");
     const previous = await getIntakeConfig();
+    const orgId = user.activeOrgId || user.orgId || DEFAULT_ORG_ID;
     // merge: renovar o endereço não pode apagar instituição, cidade e mensagem.
     await Collections.intakeConfig().doc("general").set({
       id: "general", token, active: true, updatedAt: Date.now(), updatedBy: user.id,
     }, { merge: true });
+    // Mapa global: é por ele que o formulário aberto descobre a unidade.
+    await Collections.publicLinks().doc(token).set({ id: token, orgId, kind: "intake", createdAt: Date.now() });
+    if (previous.token) await Collections.publicLinks().doc(previous.token).delete().catch(() => {});
     await audit(actorOf(user), { action: "intake.link.rotate", entity: "intake", entityId: "general", entityLabel: "Link do formulário público", details: { hadPrevious: !!previous.token } });
     revalidatePath("/cadastros");
     return success(previous.token ? "Link novo gerado. O anterior deixou de funcionar." : "Link criado.");

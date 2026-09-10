@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@/lib/firebase/admin";
+import { col } from "@/lib/db/collections";
 
 /**
  * Armazenamento de arquivos no próprio Firestore (plano gratuito, sem Storage).
@@ -23,23 +24,23 @@ export interface StoredFileMeta {
 export async function saveFile(buffer: Buffer, opts: { name: string; contentType: string; createdBy: string }): Promise<StoredFileMeta> {
   if (buffer.length === 0) throw new Error("Arquivo vazio.");
   if (buffer.length > MAX_FILE_BYTES) throw new Error("Arquivo acima de 4 MB. Reduza a resolução do scanner ou envie em partes.");
-  const ref = db.collection("files").doc();
+  const ref = col("files").doc();
   const chunks = Math.ceil(buffer.length / CHUNK);
   const meta: StoredFileMeta = { id: ref.id, name: opts.name, contentType: opts.contentType, size: buffer.length, chunks, createdAt: Date.now(), createdBy: opts.createdBy };
   const batch = db.batch();
   batch.set(ref, meta);
   for (let i = 0; i < chunks; i++) {
-    batch.set(db.collection("fileChunks").doc(`${ref.id}_${i}`), { fileId: ref.id, index: i, data: buffer.subarray(i * CHUNK, (i + 1) * CHUNK) });
+    batch.set(col("fileChunks").doc(`${ref.id}_${i}`), { fileId: ref.id, index: i, data: buffer.subarray(i * CHUNK, (i + 1) * CHUNK) });
   }
   await batch.commit();
   return meta;
 }
 
 export async function readFile(fileId: string): Promise<{ meta: StoredFileMeta; buffer: Buffer } | null> {
-  const metaSnap = await db.collection("files").doc(fileId).get();
+  const metaSnap = await col("files").doc(fileId).get();
   if (!metaSnap.exists) return null;
   const meta = metaSnap.data() as StoredFileMeta;
-  const refs = Array.from({ length: meta.chunks }, (_, i) => db.collection("fileChunks").doc(`${fileId}_${i}`));
+  const refs = Array.from({ length: meta.chunks }, (_, i) => col("fileChunks").doc(`${fileId}_${i}`));
   const snaps = await db.getAll(...refs);
   const parts = snaps.map((s) => {
     const d = s.data()?.data as Buffer | Uint8Array | undefined;
@@ -50,11 +51,11 @@ export async function readFile(fileId: string): Promise<{ meta: StoredFileMeta; 
 }
 
 export async function deleteFile(fileId: string): Promise<void> {
-  const metaSnap = await db.collection("files").doc(fileId).get();
+  const metaSnap = await col("files").doc(fileId).get();
   if (!metaSnap.exists) return;
   const meta = metaSnap.data() as StoredFileMeta;
   const batch = db.batch();
-  for (let i = 0; i < meta.chunks; i++) batch.delete(db.collection("fileChunks").doc(`${fileId}_${i}`));
+  for (let i = 0; i < meta.chunks; i++) batch.delete(col("fileChunks").doc(`${fileId}_${i}`));
   batch.delete(metaSnap.ref);
   await batch.commit();
 }

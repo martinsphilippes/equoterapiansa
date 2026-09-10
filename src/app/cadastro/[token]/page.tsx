@@ -11,8 +11,10 @@ export const metadata = { title: "Ficha de cadastro", robots: { index: false, fo
 
 export default async function PublicIntakePage({ params }: { params: Params<{ token: string }> }) {
   const { token } = await params;
-  const [config, settings] = await Promise.all([configForToken(token), getSettings()]);
+  // Primeiro o link, que define a unidade; só depois lemos dados dela.
+  const config = await configForToken(token);
   if (!config) notFound();
+  const settings = await getSettings();
   const entityName = config.entityName?.trim() || settings.orgName;
   const ownBrand = entityName === settings.orgName;
   return (

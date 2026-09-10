@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { after } from "next/server";
+import { currentOrgIdOrNull, runInOrg } from "./org-context";
 
 /**
  * Consultas do Firestore podem exigir índices compostos. Enquanto um índice não
@@ -29,24 +30,28 @@ export function indexLinkOf(e: unknown): string | null {
  * da resposta). Uma tentativa por instância a cada 10 minutos; criar índice é
  * idempotente e não custa nada no plano gratuito.
  */
-let nextAttempt = 0;
-let repairing = false;
+const nextAttempt = new Map<string, number>();
+const repairing = new Set<string>();
 function scheduleIndexRepair() {
+  // Cada unidade tem os seus índices: a espera e a tentativa são por unidade.
+  const orgId = currentOrgIdOrNull();
+  if (!orgId) return;
   const now = Date.now();
-  if (repairing || now < nextAttempt) return;
-  repairing = true;
-  nextAttempt = now + 10 * 60_000;
+  if (repairing.has(orgId) || now < (nextAttempt.get(orgId) ?? 0)) return;
+  repairing.add(orgId);
+  nextAttempt.set(orgId, now + 10 * 60_000);
   const run = async () => {
     try {
       const { createMissingIndexes } = await import("./index-admin");
-      const r = await createMissingIndexes();
+      // A unidade é capturada agora: depois da resposta o contexto já não existe.
+      const r = await runInOrg(orgId, () => createMissingIndexes());
       // Sem permissão no Google Cloud não adianta insistir: espera muito mais.
-      if (r.permissionDenied) nextAttempt = Date.now() + 6 * 60 * 60_000;
+      if (r.permissionDenied) nextAttempt.set(orgId, Date.now() + 6 * 60 * 60_000);
       console.log("[firestore] autocriação de índices:", JSON.stringify({ created: r.created, existing: r.existing, permissionDenied: r.permissionDenied, failed: r.failed.length }));
     } catch (e) {
       console.warn("[firestore] autocriação de índices falhou:", e instanceof Error ? e.message : e);
     } finally {
-      repairing = false;
+      repairing.delete(orgId);
     }
   };
   try {

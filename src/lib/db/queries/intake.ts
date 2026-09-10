@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { AggregateField } from "firebase-admin/firestore";
 import { Collections, mapDocs, getDoc } from "../collections";
+import { enterOrg } from "../org-context";
 import type { IntakeConfig, IntakeStatus, IntakeSubmission } from "../types";
 
 const CONFIG_ID = "general";
@@ -13,10 +14,19 @@ export const getIntakeConfig = cache(async (): Promise<IntakeConfig> => {
   return { id: CONFIG_ID, token: "", active: false, updatedAt: 0 };
 });
 
-/** Ficha correspondente a um token; nulo quando o link não vale mais. */
+/**
+ * Resolve o token do link público para a unidade dona dele e entra nessa
+ * unidade. É o único caminho de leitura sem sessão, e ele mesmo define o
+ * contexto: sem isso, o formulário não saberia de qual empresa é.
+ */
 export async function configForToken(token: string): Promise<IntakeConfig | null> {
+  if (!token) return null;
+  const link = await Collections.publicLinks().doc(token).get();
+  if (!link.exists) return null;
+  const { orgId } = link.data() as { orgId: string };
+  enterOrg(orgId);
   const config = await getIntakeConfig();
-  if (!config.active || !config.token || config.token !== token) return null;
+  if (!config.active || config.token !== token) return null;
   return config;
 }
 

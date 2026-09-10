@@ -87,7 +87,29 @@ src/components        interface (mobile-first)
 e2e/                  testes de fumaça com Playwright contra os emuladores
 ```
 
+## Unidades (empresas separadas na mesma instalação)
+
+A instalação atende mais de uma empresa sem misturar nada. A separação é **física**: cada unidade guarda os dados em coleções próprias, com o identificador dela como prefixo (`equitacao-vida_praticantes`, `equitacao-vida_financialEntries`, …). A unidade principal fica sem prefixo, então nada precisa ser migrado.
+
+Foi uma escolha deliberada contra o caminho mais comum, um campo `orgId` filtrado em toda consulta: são centenas de pontos de leitura e basta **um** filtro esquecido numa consulta nova para uma empresa ver a outra. Com coleções separadas, a consulta feita na unidade errada simplesmente não encontra nada.
+
+Como a unidade chega até a consulta (`src/lib/db/org-context.ts`):
+
+- Quem descobre a unidade é a autenticação, chamada de dentro da tela ou da ação. Por isso o valor mora em um objeto criado **antes**, no começo da requisição, que a autenticação só preenche.
+- Em telas, esse objeto vem do cache do React, que já é por requisição.
+- Em ações e rotas, vem de um escopo aberto por `withOrgScope` — é o que `guard` faz em toda ação, junto com a leitura da sessão, porque ali o cache do React não teria escopo de requisição. Assim uma ação pode ler o registro antes de decidir que permissão exigir.
+- `runInOrg` executa um trecho em outra unidade (semear uma unidade nova, abrir um link público).
+- **Falha fechada**: sem unidade definida não há leitura nem escrita. Preferimos um erro visível a servir dados da empresa errada.
+
+Globais (fora das unidades): `users`, `organizations` e `publicLinks` (o token do link público diz a que unidade ele pertence).
+
+Cada pessoa pertence a uma unidade (`orgId`) e pode receber acesso a outras (`orgIds`); só quem tem mais de uma vê o seletor de unidade. A tela de usuários mostra apenas quem é da unidade em uso. Criar uma unidade em *Configurações → Unidades* (só o Dono) já cria os cadastros iniciais, o plano de contas do financeiro e os índices do banco daquela unidade.
+
+O teste `e2e/smoke-unidades.mjs` prova o isolamento ponta a ponta: duas empresas, dois logins, e nenhum enxerga praticante, usuário ou financeiro do outro — inclusive tentando abrir o registro por endereço direto.
+
 ## Coleções do Firestore
+
+Os nomes abaixo valem para a unidade principal; nas demais eles vêm com o prefixo da unidade.
 
 `users`, `settings/general`, `jobRoles`, `collaborators`, `documentTypes`, `documents`, `files` + `fileChunks` (conteúdo dos arquivos), `timeEntries` (`{colaborador}_{data}`), `payrollMonths` (`{colaborador}_{AAAA-MM}`), `practitioners`, `guardians`, `appointments`, `sessions`, `assessmentCategories`, `assessments`, `reports`, `announcements`, `practitionerEvents`, `auditLogs`.
 
@@ -111,7 +133,7 @@ A barra inferior comporta cinco alvos de toque confortáveis numa tela de 390 po
 
 ## Usuários e acessos
 
-Todo acesso está ligado a uma pessoa: a equipe a um colaborador (de onde vêm jornada, pagamentos e o escopo do profissional) e a família a um responsável. Em *Configurações → Usuários e permissões* o acesso pode ser criado de três formas: cadastrando a pessoa nova (o colaborador é criado junto), escolhendo um colaborador que ainda não tem acesso, ou escolhendo um responsável. A senha provisória aparece uma única vez, na tela, e é trocada no primeiro acesso.
+Todo acesso está ligado a uma pessoa: a equipe a um colaborador (de onde vêm jornada, pagamentos e o escopo do profissional) e a família a um responsável. Em *Configurações → Usuários e permissões* o acesso pode ser criado de três formas: cadastrando a pessoa nova (o colaborador é criado junto), escolhendo um colaborador que ainda não tem acesso, ou escolhendo um responsável. A senha provisória aparece uma única vez, na tela, e é trocada no primeiro acesso. O acesso nasce na unidade em uso; quem administra as duas empresas pode marcar as unidades adicionais de cada pessoa na própria tela.
 
 ## Regras de negócio que merecem destaque
 

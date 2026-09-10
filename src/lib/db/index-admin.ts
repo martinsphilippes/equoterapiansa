@@ -1,5 +1,6 @@
 import "server-only";
 import { adminApp, isEmulator } from "@/lib/firebase/admin";
+import { orgPrefix } from "./org-context";
 import required from "../../../firestore.indexes.json";
 
 /**
@@ -11,7 +12,19 @@ export interface RequiredIndex { collectionGroup: string; queryScope: string; fi
 export type IndexState = "READY" | "CREATING" | "NEEDS_REPAIR" | "MISSING" | "UNKNOWN";
 export interface IndexStatus extends RequiredIndex { state: IndexState }
 
-export const REQUIRED_INDEXES: RequiredIndex[] = (required.indexes ?? []) as RequiredIndex[];
+const BASE_INDEXES: RequiredIndex[] = (required.indexes ?? []) as RequiredIndex[];
+
+/**
+ * Índices da unidade atual. Cada unidade tem coleções próprias, então precisa
+ * do mesmo conjunto de índices com o nome prefixado.
+ */
+export function requiredIndexes(): RequiredIndex[] {
+  const prefix = orgPrefix();
+  return BASE_INDEXES.map((i) => ({ ...i, collectionGroup: prefix + i.collectionGroup }));
+}
+
+/** Mantido para telas que só listam os campos esperados. */
+export const REQUIRED_INDEXES: RequiredIndex[] = BASE_INDEXES;
 
 const API = "https://firestore.googleapis.com/v1";
 
@@ -46,12 +59,13 @@ async function listOf(collectionGroup: string): Promise<{ signature: string; sta
 
 /** Estado de cada índice necessário. Uma chamada por coleção envolvida. */
 export async function indexStatus(): Promise<{ ok: true; items: IndexStatus[] } | { ok: false; error: string }> {
-  if (isEmulator) return { ok: true, items: REQUIRED_INDEXES.map((i) => ({ ...i, state: "READY" as const })) };
+  const wanted = requiredIndexes();
+  if (isEmulator) return { ok: true, items: wanted.map((i) => ({ ...i, state: "READY" as const })) };
   try {
-    const groups = Array.from(new Set(REQUIRED_INDEXES.map((i) => i.collectionGroup)));
+    const groups = Array.from(new Set(wanted.map((i) => i.collectionGroup)));
     const lists = await Promise.all(groups.map(async (g) => [g, await listOf(g)] as const));
     const existing = new Map(lists.flatMap(([, l]) => l.map((x) => [x.signature, x.state] as const)));
-    return { ok: true, items: REQUIRED_INDEXES.map((i) => ({ ...i, state: existing.get(signature(i)) ?? "MISSING" })) };
+    return { ok: true, items: wanted.map((i) => ({ ...i, state: existing.get(signature(i)) ?? "MISSING" })) };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }

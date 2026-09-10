@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { MoreHorizontal, UserRound, X, Home, Calendar, Users, Clock, Briefcase, Wallet, CircleDollarSign, Megaphone, ShieldCheck, Settings, Heart, FileText, type LucideIcon } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
 import type { NavItem } from "./NavLinks";
+import { OrgSwitcher, type OrgOption } from "./OrgSwitcher";
 
 const icons: Record<string, LucideIcon> = {
   home: Home, calendar: Calendar, users: Users, clock: Clock, team: Briefcase, money: Wallet, finance: CircleDollarSign,
@@ -15,7 +16,7 @@ const icons: Record<string, LucideIcon> = {
  * Quinta célula da barra inferior no celular. A barra comporta cinco alvos de
  * toque confortáveis; o restante do menu vive aqui, em uma folha deslizante.
  */
-export function MoreMenu({ items }: { items: NavItem[] }) {
+export function MoreMenu({ items, orgs = [], activeOrgId = "" }: { items: NavItem[]; orgs?: OrgOption[]; activeOrgId?: string }) {
   // Guarda a rota em que a folha foi aberta: se a navegação acontece, ela fecha
   // sozinha na renderização seguinte, sem efeito colateral.
   const [openedAt, setOpenedAt] = useState<string | null>(null);
@@ -54,6 +55,7 @@ export function MoreMenu({ items }: { items: NavItem[] }) {
                 <X className="h-5 w-5" />
               </button>
             </div>
+            {orgs.length > 1 && <div className="px-3 pb-3"><OrgSwitcher orgs={orgs} activeId={activeOrgId} compact /></div>}
             <ul className="px-3 pb-2 max-h-[60dvh] overflow-y-auto">
               {items.map((it) => {
                 const Icon = icons[it.icon] ?? Home;

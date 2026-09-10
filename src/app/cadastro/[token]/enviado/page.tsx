@@ -9,7 +9,9 @@ export const metadata = { title: "Ficha enviada", robots: { index: false, follow
 
 export default async function IntakeSentPage({ params, searchParams }: { params: Params<{ token: string }>; searchParams: SearchParams }) {
   const { token } = await params;
-  const [sp, settings, config] = await Promise.all([searchParams, getSettings(), configForToken(token)]);
+  // O link define a unidade; as configurações lidas depois são as dela.
+  const [sp, config] = await Promise.all([searchParams, configForToken(token)]);
+  const settings = await getSettings();
   const protocol = sp1(sp, "p");
   const entityName = config?.entityName?.trim() || settings.orgName;
   const ownBrand = entityName === settings.orgName;

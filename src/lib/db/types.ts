@@ -4,11 +4,35 @@ import type { Permission, Role } from "@/lib/auth/permissions";
 export type ISODate = string;
 export type HM = string;
 
+/** Empresa atendida pelo sistema. Cada uma tem dados próprios e isolados. */
+export interface Organization {
+  id: string; // usado como prefixo das coleções
+  name: string;
+  city?: string;
+  active: boolean;
+  createdAt: number;
+  createdBy?: string;
+}
+
+/** Endereço público (ficha) apontando para a unidade dona dele. */
+export interface PublicLink {
+  id: string; // o próprio token
+  orgId: string;
+  kind: "intake";
+  createdAt: number;
+}
+
 export interface UserProfile {
   id: string; // uid do Firebase Auth
   email: string;
   name: string;
   role: Role;
+  /** Unidade a que a pessoa pertence. */
+  orgId?: string;
+  /** Unidades adicionais que a pessoa pode acessar (Dono das duas empresas). */
+  orgIds?: string[];
+  /** Unidade em uso nesta sessão. Preenchido ao carregar o usuário, não gravado. */
+  activeOrgId?: string;
   permissions: Permission[]; // efetivas (padrão do perfil, ajustável pelo Dono)
   collaboratorId?: string;
   guardianId?: string;

@@ -1,7 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { db } from "@/lib/firebase/admin";
-import { Collections, mapDocs } from "../collections";
+import { col, Collections, mapDocs } from "../collections";
 import type { CostCenter, FinancialAccount, FinancialCategory, FinancialSettings, PaymentMethod, Supplier } from "../finance-types";
 
 /** Cadastros de apoio, uma leitura por requisição. Coleções pequenas (dezenas de docs). */
@@ -11,7 +10,7 @@ export const allAccounts = cache(async (): Promise<FinancialAccount[]> => mapDoc
 export const allPaymentMethods = cache(async (): Promise<PaymentMethod[]> => mapDocs(await Collections.paymentMethods().get()).sort((a, b) => a.order - b.order));
 export const allSuppliers = cache(async (): Promise<Supplier[]> => mapDocs(await Collections.suppliers().get()).sort((a, b) => a.name.localeCompare(b.name, "pt-BR")));
 
-export const financeSettingsRef = () => db.collection("financialSettings").doc("general");
+export const financeSettingsRef = () => col("financialSettings").doc("general");
 export const getFinanceSettings = cache(async (): Promise<FinancialSettings> => {
   const snap = await financeSettingsRef().get();
   return { showToGuardians: true, updatedAt: 0, ...(snap.exists ? (snap.data() as Partial<FinancialSettings>) : {}) };

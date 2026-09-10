@@ -6,6 +6,7 @@ import { hasAny, hasPermission } from "@/lib/auth/session";
 import { ROLE_LABELS } from "@/lib/auth/permissions";
 import { NavLinks, type NavItem } from "./NavLinks";
 import { MoreMenu } from "./MoreMenu";
+import { OrgSwitcher, type OrgOption } from "./OrgSwitcher";
 import { LogoutButton } from "./LogoutButton";
 import { Avatar } from "@/components/ui";
 import { BrandLogo, BrandLockup } from "@/components/brand/Brand";
@@ -56,8 +57,9 @@ export function splitNav(nav: NavItem[]): { bar: NavItem[]; more: NavItem[] } {
   return { bar, more: nav.filter((i) => !bar.includes(i)) };
 }
 
-export function AppShell({ user, children, nav, homeHref = "/painel" }: { user: UserProfile; children: ReactNode; nav: NavItem[]; homeHref?: string; orgName?: string }) {
+export function AppShell({ user, children, nav, homeHref = "/painel", orgs = [] }: { user: UserProfile; children: ReactNode; nav: NavItem[]; homeHref?: string; orgName?: string; orgs?: OrgOption[] }) {
   const { bar, more } = splitNav(nav);
+  const activeOrgId = user.activeOrgId ?? orgs[0]?.id ?? "";
   return (
     <div className="flex-1 flex min-h-dvh">
       {/* Sidebar (desktop): logo completa, navegação e usuário */}
@@ -65,6 +67,7 @@ export function AppShell({ user, children, nav, homeHref = "/painel" }: { user: 
         <Link prefetch={false} href={homeHref as never} className="flex items-center justify-center px-6 pt-6 pb-4">
           <BrandLogo className="w-44" sizes="176px" />
         </Link>
+        <OrgSwitcher orgs={orgs} activeId={activeOrgId} />
         <div className="flex-1 overflow-y-auto py-2">
           <NavLinks items={nav} orientation="vertical" />
         </div>
@@ -84,11 +87,14 @@ export function AppShell({ user, children, nav, homeHref = "/painel" }: { user: 
         {/* Header (mobile): símbolo + nome, avatar */}
         <header className="md:hidden sticky top-0 z-20 h-14 flex items-center justify-between px-4 bg-surface/90 backdrop-blur border-b border-border no-print pt-[env(safe-area-inset-top)]">
           <Link prefetch={false} href={homeHref as never} className="min-w-0"><BrandLockup compact /></Link>
-          <Link prefetch={false} href="/conta" aria-label="Minha conta"><Avatar name={user.name} size="sm" /></Link>
+          <div className="flex items-center gap-2 min-w-0">
+            {orgs.length > 1 && <span className="text-xs font-semibold text-primary-700 truncate max-w-32">{orgs.find((o) => o.id === activeOrgId)?.name}</span>}
+            <Link prefetch={false} href="/conta" aria-label="Minha conta"><Avatar name={user.name} size="sm" /></Link>
+          </div>
         </header>
         <main className="flex-1 px-4 py-5 md:px-8 md:py-7 pb-24 md:pb-8 max-w-6xl w-full mx-auto">{children}</main>
         <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-surface border-t border-border no-print pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-16px_rgba(10,14,110,0.25)]">
-          <NavLinks items={bar} orientation="horizontal" trailing={more.length > 0 ? <MoreMenu items={more} /> : undefined} />
+          <NavLinks items={bar} orientation="horizontal" trailing={more.length > 0 ? <MoreMenu items={more} orgs={orgs} activeOrgId={activeOrgId} /> : undefined} />
         </nav>
       </div>
     </div>

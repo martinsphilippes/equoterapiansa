@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { actionUser, actorOf } from "@/lib/auth/session";
 import { Collections, getDoc } from "@/lib/db/collections";
 import { getSettings, settingsRef } from "@/lib/db/settings";
+import { withOrgScope } from "@/lib/db/org-context";
 import { audit } from "@/lib/db/audit";
 import type { DocumentOwnerType, ScaleLevel } from "@/lib/db/types";
 import { guard, str, opt, num, bool, list, success, fail, HM, ISO_DATE, type ActionResult } from "./result";
@@ -185,5 +186,8 @@ export async function saveAssessmentItem(_prev: ActionResult | null, fd: FormDat
 }
 
 export async function getSettingsSnapshot() {
-  return getSettings();
+  return withOrgScope(async () => {
+    await actionUser();
+    return getSettings();
+  });
 }

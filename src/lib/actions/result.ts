@@ -1,4 +1,6 @@
 import { unstable_rethrow } from "next/navigation";
+import { withOrgScope } from "@/lib/db/org-context";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export type ActionResult = { ok: true; message?: string; id?: string; redirect?: string } | { ok: false; error: string };
 
@@ -12,7 +14,13 @@ export function success(message?: string, id?: string, redirect?: string): Actio
 /** Converte exceções em resultado amigável para a interface (preserva redirects do Next). */
 export async function guard(fn: () => Promise<ActionResult>): Promise<ActionResult> {
   try {
-    return await fn();
+    // Resolve a unidade antes de qualquer leitura: várias ações precisam ler o
+    // registro para saber que permissão exigir, e sem unidade a leitura falha.
+    // A sessão fica guardada no escopo, então autenticar de novo não relê nada.
+    return await withOrgScope(async () => {
+      await getCurrentUser();
+      return fn();
+    });
   } catch (e) {
     unstable_rethrow(e);
     const msg = e instanceof Error ? e.message : "Erro inesperado.";

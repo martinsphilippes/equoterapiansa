@@ -5,7 +5,9 @@ import type { ReactNode } from "react";
 
 /** /conta é compartilhada entre equipe e responsáveis: escolhe o shell conforme o perfil. */
 export default async function AccountLayout({ children }: { children: ReactNode }) {
-  const [user, settings] = await Promise.all([requireUser(), getSettings()]);
+  // A unidade precisa estar definida antes de qualquer leitura: nada de Promise.all com a autenticação.
+  const user = await requireUser();
+  const settings = await getSettings();
   const isGuardian = user.role === "guardian";
   const nav = isGuardian
     ? [{ href: "/familia", label: "Início", icon: "home" }, { href: "/familia/comunicados", label: "Avisos", icon: "megaphone" }, { href: "/conta", label: "Conta", icon: "settings" }]

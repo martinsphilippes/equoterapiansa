@@ -1,19 +1,29 @@
 import "server-only";
 import { db } from "@/lib/firebase/admin";
+import { orgPrefix } from "./org-context";
 import type { CollectionReference, DocumentData, DocumentReference } from "firebase-admin/firestore";
 import type {
   Announcement, Appointment, Assessment, AssessmentCategory, AuditLog, Collaborator, DocumentType,
   EvolutionReport, Guardian, JobRole, PayrollMonth, Practitioner, PractitionerEvent, Session,
-  StoredDocument, TimeEntry, UserProfile, IntakeSubmission, IntakeConfig,
+  StoredDocument, TimeEntry, UserProfile, IntakeSubmission, IntakeConfig, Organization, PublicLink,
 } from "./types";
 import type { BillingPlan, CostCenter, FinancialAccount, FinancialCategory, FinancialEntry, FinancialSummary, FinancialTransaction, PaymentMethod, RecurrenceRule, Supplier } from "./finance-types";
 
-function col<T extends DocumentData>(name: string) {
+/** Coleção da unidade atual. O prefixo separa fisicamente os dados de cada empresa. */
+export function col<T extends DocumentData>(name: string) {
+  return db.collection(orgPrefix() + name) as CollectionReference<T>;
+}
+
+/** Coleção compartilhada por todas as unidades (login, unidades e links públicos). */
+function globalCol<T extends DocumentData>(name: string) {
   return db.collection(name) as CollectionReference<T>;
 }
 
 export const Collections = {
-  users: () => col<UserProfile>("users"),
+  // Globais: identificam a pessoa e a unidade antes de existir contexto.
+  users: () => globalCol<UserProfile>("users"),
+  organizations: () => globalCol<Organization>("organizations"),
+  publicLinks: () => globalCol<PublicLink>("publicLinks"),
   jobRoles: () => col<JobRole>("jobRoles"),
   collaborators: () => col<Collaborator>("collaborators"),
   documentTypes: () => col<DocumentType>("documentTypes"),

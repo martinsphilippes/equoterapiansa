@@ -11,7 +11,8 @@ import { displayStatus } from "@/lib/domain/finance";
 export const metadata = { title: "Financeiro" };
 
 export default async function FamilyFinancePage() {
-  const [{ guardian }, settings] = await Promise.all([requireGuardian(), getFinanceSettings()]);
+  const { guardian } = await requireGuardian();
+  const settings = await getFinanceSettings();
   if (!settings.showToGuardians) return <Card><EmptyState title="Área financeira indisponível" description="Fale com a secretaria para informações sobre mensalidades." /></Card>;
   const fin = await guardianFinance(guardian.id);
   const visible = fin.entries.filter((e) => e.visibleToGuardian && e.status !== "cancelled");

@@ -10,6 +10,7 @@ export default async function SettingsLayout({ children }: { children: ReactNode
     tabs.push({ href: "/configuracoes", label: "Instituição e jornada" }, { href: "/configuracoes/funcoes", label: "Funções" }, { href: "/configuracoes/documentos", label: "Tipos de documentos" }, { href: "/configuracoes/avaliacao", label: "Avaliação" });
   }
   if (hasPermission(user, "users.manage")) tabs.push({ href: "/configuracoes/usuarios", label: "Usuários e permissões" });
+  if (user.role === "owner") tabs.push({ href: "/configuracoes/unidades", label: "Unidades" });
   return (
     <div>
       <PageHeader title="Configurações" />

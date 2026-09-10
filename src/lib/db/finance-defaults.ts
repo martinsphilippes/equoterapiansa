@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/firebase/admin";
-import { Collections } from "./collections";
+import { col, Collections } from "./collections";
 import type { DreGroup } from "./finance-types";
 
 /** Cadastros iniciais do financeiro (idempotente: só roda se não houver categorias). */
@@ -57,7 +57,7 @@ export async function seedFinanceDefaults() {
     const ref = Collections.paymentMethods().doc();
     batch.set(ref, { id: ref.id, name, order: i + 1, active: true });
   });
-  batch.set(db.collection("financialSettings").doc("general"), { defaultAccountId: acc.id, payrollCategoryId: salaries, tuitionCategoryId: tuition, showToGuardians: true, updatedAt: now });
+  batch.set(col("financialSettings").doc("general"), { defaultAccountId: acc.id, payrollCategoryId: salaries, tuitionCategoryId: tuition, showToGuardians: true, updatedAt: now });
   await batch.commit();
   return true;
 }
