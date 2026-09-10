@@ -93,6 +93,14 @@ e2e/                  testes de fumaça com Playwright contra os emuladores
 
 Financeiro: `financialCategories`, `costCenters`, `financialAccounts`, `paymentMethods`, `suppliers`, `financialEntries` (contas a receber/pagar, `kind`), `financialTransactions` (entradas, saídas e transferências), `recurrenceRules`, `billingPlans`, `financialSummaries/{AAAA-MM}` (resumos incrementais para painel e DRE) e `financialSettings/general`.
 
+## Ficha pública (formulário de cadastro, saúde e aptidão)
+
+O link é gerado em *Fichas* pelo Dono ou por quem tem `intake.manage`, e pode ser aberto, fechado ou renovado a qualquer momento. Quem recebe o endereço preenche sem senha: a seção do responsável legal aparece sozinha quando a data de nascimento indica menor de idade, cada pergunta de saúde só pede observação quando a resposta é sim, e o envio devolve um protocolo.
+
+A ficha cai na lista interna, com destaque para menores e para quantas respostas de saúde vieram marcadas. Na tela da ficha a equipe registra a conferência (documentação médica, atestado, necessidade de acompanhamento), imprime o documento completo em PDF pelo navegador e converte em praticante com um clique, criando junto o responsável legal e levando os alertas de saúde para as informações visíveis à equipe.
+
+O formulário é declarado como dados em `src/lib/domain/intake.ts`: a tela pública, a validação no servidor e a versão impressa leem o mesmo esquema, e cada ficha guarda a versão com que foi preenchida. Proteções do endereço aberto: token no link, campo-isca, limite de envios por hora e nenhuma leitura de dados exposta.
+
 ## Navegação no celular
 
 A barra inferior comporta cinco alvos de toque confortáveis numa tela de 390 pontos. Quatro são fixos, escolhidos por perfil (quem administra recebe Painel, Agenda, Praticantes e Financeiro; quem atende recebe Jornada no lugar do Financeiro), e o quinto é **Mais**, que abre uma folha com o restante do menu, mais Minha conta e Sair. A folha respeita as permissões: ninguém vê ali o que não veria no menu. No computador a barra lateral continua mostrando tudo.

@@ -17,6 +17,7 @@ export function buildNav(user: UserProfile): NavItem[] {
   else items.push({ href: "/painel", label: "Início", icon: "home" });
   items.push({ href: "/agenda", label: "Agenda", icon: "calendar" });
   if (hasPermission(user, "practitioners.view") || isProfessional) items.push({ href: "/praticantes", label: "Praticantes", icon: "users" });
+  if (hasPermission(user, "intake.manage")) items.push({ href: "/cadastros", label: "Fichas", icon: "file" });
   items.push({ href: "/jornada", label: "Jornada", icon: "clock" });
   if (hasAny(user, ["collaborators.view", "collaborators.manage"])) items.push({ href: "/colaboradores", label: "Equipe", icon: "team" });
   if (hasAny(user, ["payments.manage", "finance.view"])) items.push({ href: "/pagamentos", label: "Pagamentos", icon: "money" });

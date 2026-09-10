@@ -4,7 +4,7 @@ import type { CollectionReference, DocumentData, DocumentReference } from "fireb
 import type {
   Announcement, Appointment, Assessment, AssessmentCategory, AuditLog, Collaborator, DocumentType,
   EvolutionReport, Guardian, JobRole, PayrollMonth, Practitioner, PractitionerEvent, Session,
-  StoredDocument, TimeEntry, UserProfile,
+  StoredDocument, TimeEntry, UserProfile, IntakeSubmission, IntakeConfig,
 } from "./types";
 import type { BillingPlan, CostCenter, FinancialAccount, FinancialCategory, FinancialEntry, FinancialSummary, FinancialTransaction, PaymentMethod, RecurrenceRule, Supplier } from "./finance-types";
 
@@ -30,6 +30,9 @@ export const Collections = {
   announcements: () => col<Announcement>("announcements"),
   practitionerEvents: () => col<PractitionerEvent>("practitionerEvents"),
   auditLogs: () => col<AuditLog>("auditLogs"),
+  // Ficha pública
+  intakeSubmissions: () => col<IntakeSubmission>("intakeSubmissions"),
+  intakeConfig: () => col<IntakeConfig>("intakeConfig"),
   // Financeiro
   financialCategories: () => col<FinancialCategory>("financialCategories"),
   costCenters: () => col<CostCenter>("costCenters"),

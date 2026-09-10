@@ -384,3 +384,49 @@ export interface AuditLog {
   at: number;
   details?: Record<string, unknown>;
 }
+
+export type IntakeStatus = "new" | "reviewed" | "converted" | "archived";
+
+/** Ficha enviada pelo formulário público. Nasce fora do sistema e só vira cadastro após conferência. */
+export interface IntakeSubmission {
+  id: string;
+  /** Código curto informado a quem preencheu, para referência no atendimento. */
+  protocol: string;
+  status: IntakeStatus;
+  /** Versão do esquema com que foi preenchida. */
+  version: number;
+  /** Respostas por id de campo do esquema. */
+  answers: Record<string, string>;
+  // Denormalizados para a lista, evitando abrir cada ficha.
+  practitionerName: string;
+  guardianName?: string | null;
+  phone?: string | null;
+  city?: string | null;
+  birthDate?: ISODate | null;
+  minor: boolean;
+  submittedAt: number;
+  /** Conferência interna (seção de uso interno do papel). */
+  internal?: {
+    checkedBy?: string;
+    checkedAt?: number;
+    medicalDocs?: boolean;
+    medicalRelease?: "sim" | "nao" | "na";
+    needsSupport?: boolean;
+    notes?: string;
+  } | null;
+  practitionerId?: string | null;
+  guardianId?: string | null;
+  updatedAt: number;
+  updatedBy?: string | null;
+}
+
+/** Configuração do link público da ficha. */
+export interface IntakeConfig {
+  id: string;
+  token: string;
+  active: boolean;
+  /** Mensagem opcional exibida no topo do formulário público. */
+  intro?: string;
+  updatedAt: number;
+  updatedBy?: string | null;
+}

@@ -23,6 +23,7 @@ export const PERMISSIONS = {
   "documents.manage": "Enviar e excluir documentos",
   "practitioners.view": "Ver praticantes",
   "practitioners.manage": "Cadastrar e editar praticantes e responsáveis",
+  "intake.manage": "Fichas do formulário público: ver, conferir e converter",
   "clinical.view": "Ver informações clínicas e terapêuticas",
   "sessions.record": "Registrar atendimentos e presença",
   "assessments.record": "Registrar avaliações",
