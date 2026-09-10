@@ -104,6 +104,14 @@ export function IntakeForm({ token, today, orgName }: { token: string; today: st
               <ul className="space-y-2 text-sm text-ink-700 list-disc pl-5">
                 {doc.declarations.map((d) => <li key={d}>{withOrg(d, orgName)}</li>)}
               </ul>
+              {doc.commitments && (
+                <>
+                  <p className="mt-4 text-sm font-semibold text-ink-900">Comprometo-me a:</p>
+                  <ul className="mt-2 space-y-2 text-sm text-ink-700 list-disc pl-5">
+                    {doc.commitments.map((c) => <li key={c}>{withOrg(c, orgName)}</li>)}
+                  </ul>
+                </>
+              )}
               {doc.id === "ficha" && <p className="mt-4 text-sm text-ink-700">{INTAKE_PRIVACY}</p>}
               {doc.closing?.map((c) => <p key={c} className="mt-3 text-sm text-ink-700">{withOrg(c, orgName)}</p>)}
               <div className="mt-5 grid grid-cols-1 gap-3">

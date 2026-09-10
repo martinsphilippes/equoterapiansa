@@ -60,7 +60,9 @@ try {
   await p2.check('input[name="img_fin_redes"]');
   await p2.check('input[name="img_declaracao"]');
   // documento 3: ciência dos riscos
+  await p2.check('input[name="termo_compromissos"]');
   await p2.check('input[name="termo_ciencia"]');
+  await p2.fill('textarea[name="termo_observacoes"]', "Chega sempre 10 minutos antes.");
   await p2.fill('input[name="assin_nome"]', "Renata Ficha " + RUN);
   await p2.fill('input[name="assin_cpf"]', "12345678901");
   await p2.selectOption('select[name="assin_qualidade"]', "Responsável legal");
@@ -87,6 +89,9 @@ try {
   await page.waitForSelector(`text=${protocolo}`);
   await page.waitForSelector("text=Autorização para captação e uso de imagem e voz");
   await page.waitForSelector("text=Termo de ciência e responsabilidade para a prática");
+  await page.waitForSelector("text=Comprometo-me a:");
+  await page.waitForSelector("text=Permanecer nos locais autorizados e respeitar as orientações de segurança da instituição.");
+  await page.waitForSelector("text=Chega sempre 10 minutos antes.");
   await page.waitForSelector("text=Publicações nas redes sociais e plataformas digitais da instituição");
   const graficos = await page.locator('div:has(> dt:text-is("Materiais gráficos, cartazes, folders e materiais institucionais"))').first().innerText();
   if (!graficos.includes("Não autorizado")) throw new Error("finalidade não marcada deveria sair como não autorizada: " + graficos);

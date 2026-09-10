@@ -88,6 +88,14 @@ export function IntakeDocument({ submission, orgName, today }: { submission: Int
               <ul className="text-sm text-ink-700 space-y-1 list-disc pl-5">
                 {doc.declarations.map((d) => <li key={d}>{withOrg(d, orgName)}</li>)}
               </ul>
+              {doc.commitments && (
+                <>
+                  <p className="text-sm font-semibold text-ink-900 mt-3">Comprometo-me a:</p>
+                  <ul className="text-sm text-ink-700 space-y-1 list-disc pl-5 mt-1">
+                    {doc.commitments.map((c) => <li key={c}>{withOrg(c, orgName)}</li>)}
+                  </ul>
+                </>
+              )}
               {doc.id === "ficha" && <p className="text-sm text-ink-700 mt-2">{INTAKE_PRIVACY}</p>}
               {doc.closing?.map((c) => <p key={c} className="text-sm text-ink-700 mt-2">{withOrg(c, orgName)}</p>)}
               <dl className="divide-y divide-border mt-3">

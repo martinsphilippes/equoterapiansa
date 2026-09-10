@@ -150,6 +150,15 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     ],
   },
   {
+    id: "termo_extra",
+    doc: "termo",
+    title: "Observações",
+    description: "Opcional. Use se houver algo que a equipe precise saber sobre a prática.",
+    fields: [
+      { id: "termo_observacoes", label: "Observações", type: "textarea", wide: true },
+    ],
+  },
+  {
     id: "imagem_uso",
     doc: "imagem",
     title: "Autorização de imagem e voz",
@@ -197,13 +206,13 @@ export interface IntakeDoc {
   purpose: string;
   /** Parágrafos antes dos aceites. */
   declarations: string[];
+  /** Itens de "comprometo-me a", listados e aceitos em bloco. */
+  commitments?: string[];
   /** Observações ao pé do documento. */
   closing?: string[];
   consents: IntakeField[];
   /** Documento que a pessoa pode recusar sem impedir a participação. */
   optional?: boolean;
-  /** Ainda faltam cláusulas a transcrever do documento em papel. */
-  incomplete?: boolean;
 }
 
 export const INTAKE_DOCS: IntakeDoc[] = [
@@ -242,17 +251,40 @@ export const INTAKE_DOCS: IntakeDoc[] = [
   {
     id: "termo",
     title: "Termo de ciência e responsabilidade para a prática",
-    purpose: "Ciência dos riscos próprios da atividade com animais.",
-    incomplete: true,
+    purpose: "Riscos próprios da atividade, responsabilidades e condutas de segurança.",
     declarations: [
       "Declaro que fui devidamente informado de que a equitação é uma atividade que envolve interação direta com animais e possui riscos próprios, podendo ocorrer situações imprevisíveis, mesmo quando todas as orientações de segurança são seguidas.",
       "Estou ciente de que o comportamento do cavalo pode sofrer alterações em razão de fatores como ambiente, clima, estímulos externos, movimentos inesperados ou outras situações próprias da atividade.",
+      "Declaro que compreendo que podem ocorrer situações como perda de equilíbrio, queda do cavalo, contato ou movimentação inesperada do animal, entre outras situações inerentes à prática.",
+      "Quando se tratar de praticante menor de idade, declaro que sou responsável pelas informações fornecidas sobre sua saúde e condições para a prática da atividade.",
+      "Comprometo-me a comunicar à {org} qualquer alteração no estado de saúde, recomendação médica, lesão ou outra situação que possa interferir na participação do praticante nas aulas.",
+      "Declaro também que orientarei o praticante a respeitar as regras da instituição e seguir as instruções dos profissionais responsáveis.",
+      "Declaro que fui informado de que, apesar da adoção de medidas de segurança e da orientação dos profissionais, não é possível eliminar completamente os riscos inerentes à prática.",
+      "Estou ciente de que a ocorrência de situações imprevisíveis envolvendo o animal ou a própria atividade pode resultar em quedas, escoriações, contusões ou outros acidentes.",
+      "Comprometo-me a seguir todas as orientações de segurança fornecidas pela {org}, reconhecendo que elas existem para reduzir os riscos e preservar a segurança dos praticantes, profissionais e animais.",
+      "Declaro estar ciente de que os equipamentos de segurança indicados pela instituição devem ser utilizados corretamente durante as atividades.",
+      "Também estou ciente de que determinadas condutas podem ser proibidas pela equipe responsável quando representarem risco à segurança do praticante, dos demais participantes, dos profissionais ou dos animais.",
+      "O descumprimento das orientações de segurança poderá resultar na interrupção da atividade, visando preservar a integridade de todos os envolvidos.",
+      "Declaro que li atentamente este Termo de Ciência e Responsabilidade, compreendi seu conteúdo e tive a oportunidade de esclarecer eventuais dúvidas.",
+      "Declaro ainda que as informações fornecidas por mim são verdadeiras e completas.",
+      "Estou ciente das características e dos riscos próprios da prática e comprometo-me a respeitar as normas, orientações e procedimentos de segurança estabelecidos pela {org}.",
+    ],
+    commitments: [
+      "Seguir todas as orientações dos profissionais responsáveis pelas aulas.",
+      "Utilizar corretamente os equipamentos de segurança indicados pela {org}.",
+      "Respeitar os animais, profissionais, demais praticantes e as regras da instituição.",
+      "Não realizar qualquer atividade com os animais sem autorização e acompanhamento dos profissionais responsáveis.",
+      "Comunicar imediatamente qualquer mal-estar, dor, lesão, tontura ou outra alteração durante a atividade.",
+      "Informar previamente qualquer alteração no estado de saúde que possa interferir na prática.",
+      "Comparecer às atividades utilizando roupas e calçados adequados para a prática.",
+      "Permanecer nos locais autorizados e respeitar as orientações de segurança da instituição.",
     ],
     closing: [
       "Este documento deve ser preenchido pelo praticante maior de idade ou, no caso de menor de idade, por seu responsável legal.",
     ],
     consents: [
-      { id: "termo_ciencia", label: "Declaro estar ciente do conteúdo deste termo e assumo o compromisso de seguir as orientações de segurança da instituição.", type: "consent", required: true, wide: true },
+      { id: "termo_compromissos", label: "Assumo todos os compromissos listados acima.", type: "consent", required: true, wide: true },
+      { id: "termo_ciencia", label: "Declaro estar ciente do conteúdo deste termo e, por estar de acordo, assino o presente documento.", type: "consent", required: true, wide: true },
     ],
   },
 ];

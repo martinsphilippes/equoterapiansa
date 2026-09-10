@@ -99,7 +99,7 @@ O link reúne três documentos em um preenchimento só: cadastro/saúde/aptidão
 
 A ficha cai na lista interna, com destaque para menores e para quantas respostas de saúde vieram marcadas. Na tela da ficha a equipe registra a conferência (documentação médica, atestado, necessidade de acompanhamento), imprime o documento completo em PDF pelo navegador e converte em praticante com um clique, criando junto o responsável legal e levando os alertas de saúde para as informações visíveis à equipe.
 
-A autorização de imagem pode ser recusada sem impedir a participação, e as cinco finalidades saem listadas uma a uma no documento impresso. A recusa vira alerta na ficha e no cadastro do praticante, para ninguém publicar foto por engano.
+O termo de ciência traz as quinze declarações e os oito compromissos do documento em papel, aceitos em bloco, e um campo livre de observações. A autorização de imagem pode ser recusada sem impedir a participação, e as cinco finalidades saem listadas uma a uma no documento impresso. A recusa vira alerta na ficha e no cadastro do praticante, para ninguém publicar foto por engano.
 
 O formulário é declarado como dados em `src/lib/domain/intake.ts`: a tela pública, a validação no servidor e a versão impressa leem o mesmo esquema, e cada ficha guarda a versão com que foi preenchida. Proteções do endereço aberto: token no link, campo-isca, limite de envios por hora e nenhuma leitura de dados exposta.
 
