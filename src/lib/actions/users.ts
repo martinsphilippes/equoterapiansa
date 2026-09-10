@@ -6,7 +6,10 @@ import { Collections, getDoc } from "@/lib/db/collections";
 import { audit } from "@/lib/db/audit";
 import { ALL_PERMISSIONS, DEFAULT_PERMISSIONS, type Permission, type Role } from "@/lib/auth/permissions";
 import type { UserProfile } from "@/lib/db/types";
-import { guard, str, list, success, fail, type ActionResult } from "./result";
+import { guard, str, opt, list, success, fail, type ActionResult } from "./result";
+import { getSettings } from "@/lib/db/settings";
+import { todayISO } from "@/lib/domain/dates";
+import type { Collaborator } from "@/lib/db/types";
 
 function randomPassword() {
   const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -66,6 +69,43 @@ export async function grantCollaboratorAccess(_prev: ActionResult | null, fd: Fo
     await batch.commit();
     // sem revalidatePath: a mensagem com a senha provisória precisa permanecer na tela
     return success(`Acesso criado. E-mail: ${email} · Senha provisória: ${password} (peça para trocar no primeiro acesso).`, uid);
+  });
+}
+
+/**
+ * Cadastra a pessoa e cria o acesso em um passo só (tela de Usuários).
+ * Todo acesso da equipe fica ligado a um colaborador: é dele que dependem
+ * jornada, pagamentos e o escopo de atendimento do profissional.
+ */
+export async function createStaffAccess(_prev: ActionResult | null, fd: FormData): Promise<ActionResult> {
+  return guard(async () => {
+    const user = await actionUser("users.manage");
+    const role = str(fd, "role") as Role;
+    if (!["manager", "professional", "staff"].includes(role)) return fail("Perfil inválido.");
+    if (role === "manager" && user.role !== "owner") return fail("Somente o Dono pode criar acesso de Gerente.");
+    const name = str(fd, "name");
+    if (name.length < 3) return fail("Informe o nome completo.");
+    const email = str(fd, "email").toLowerCase();
+    if (!email) return fail("Informe o e-mail de acesso.");
+    const jobRoleId = opt(fd, "jobRoleId");
+    const jobRole = jobRoleId ? await getDoc(Collections.jobRoles(), jobRoleId) : null;
+    if (jobRoleId && !jobRole) return fail("Função não encontrada.");
+    const settings = await getSettings();
+    const now = Date.now();
+    const ref = Collections.collaborators().doc();
+    // O acesso vem primeiro: se o e-mail já estiver em uso, nada é gravado no banco.
+    const { uid, password } = await createAccessUser({ email, name, role, collaboratorId: ref.id, password: str(fd, "password") || undefined });
+    const collaborator: Collaborator = {
+      id: ref.id, name, email, jobRoleId: jobRole?.id, jobRoleName: jobRole?.name,
+      payType: "monthly", status: "active", admissionDate: todayISO(settings.timezone),
+      userId: uid, createdAt: now, updatedAt: now, createdBy: user.id, updatedBy: user.id,
+    };
+    const batch = db.batch();
+    batch.set(ref, collaborator);
+    await audit(actorOf(user), { action: "user.create", entity: "user", entityId: uid, entityLabel: name, details: { role, collaboratorId: ref.id, createdCollaborator: true } }, batch);
+    await batch.commit();
+    // sem revalidatePath: a senha provisória precisa continuar na tela
+    return success(`Acesso criado para ${name}. E-mail: ${email} · Senha provisória: ${password} (peça para trocar no primeiro acesso).`, uid);
   });
 }
 

@@ -93,6 +93,10 @@ e2e/                  testes de fumaça com Playwright contra os emuladores
 
 Financeiro: `financialCategories`, `costCenters`, `financialAccounts`, `paymentMethods`, `suppliers`, `financialEntries` (contas a receber/pagar, `kind`), `financialTransactions` (entradas, saídas e transferências), `recurrenceRules`, `billingPlans`, `financialSummaries/{AAAA-MM}` (resumos incrementais para painel e DRE) e `financialSettings/general`.
 
+## Usuários e acessos
+
+Todo acesso está ligado a uma pessoa: a equipe a um colaborador (de onde vêm jornada, pagamentos e o escopo do profissional) e a família a um responsável. Em *Configurações → Usuários e permissões* o acesso pode ser criado de três formas: cadastrando a pessoa nova (o colaborador é criado junto), escolhendo um colaborador que ainda não tem acesso, ou escolhendo um responsável. A senha provisória aparece uma única vez, na tela, e é trocada no primeiro acesso.
+
 ## Regras de negócio que merecem destaque
 
 - **Horas**: soma dos períodos (entrada→saída) menos intervalo. Atraso = primeira entrada após o início da jornada (acima da tolerância). Faltas = dias úteis passados sem registro ou marcados como falta. Jornada padrão configurável; cada colaborador pode ter jornada própria.

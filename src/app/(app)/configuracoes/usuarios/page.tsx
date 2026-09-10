@@ -7,14 +7,26 @@ import { resetUserPassword, setUserActive } from "@/lib/actions/users";
 import { effectivePermissions } from "@/lib/auth/session";
 import { ROLE_LABELS } from "@/lib/auth/permissions";
 import { PermissionsEditor } from "@/components/settings/PermissionsEditor";
+import { AddUserForm } from "@/components/settings/AddUserForm";
+import { listCollaborators } from "@/lib/db/queries/collaborators";
 
 export default async function UsersPage() {
   const me = await requirePermission("users.manage");
-  const users = mapDocs(await Collections.users().get()).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+  const [users, collaborators, guardianDocs, jobRoleDocs] = await Promise.all([
+    mapDocs(await Collections.users().get()),
+    listCollaborators({ status: "active" }),
+    mapDocs(await Collections.guardians().get()),
+    mapDocs(await Collections.jobRoles().get()),
+  ]);
+  users.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   const staff = users.filter((u) => u.role !== "guardian");
   const guardians = users.filter((u) => u.role === "guardian");
+  const freeCollaborators = collaborators.filter((c) => !c.userId).map((c) => ({ id: c.id, name: c.name, email: c.email, hint: c.jobRoleName }));
+  const freeGuardians = guardianDocs.filter((g) => !g.userId).sort((a, b) => a.name.localeCompare(b.name, "pt-BR")).map((g) => ({ id: g.id, name: g.name, email: g.email, hint: g.relationship }));
+  const jobRoles = jobRoleDocs.sort((a, b) => a.name.localeCompare(b.name, "pt-BR")).map((j) => ({ id: j.id, name: j.name }));
   return (
     <div className="space-y-5">
+      <AddUserForm collaborators={freeCollaborators} guardians={freeGuardians} jobRoles={jobRoles} isOwner={me.role === "owner"} />
       <Card title="Equipe">
         <ul className="divide-y divide-border">
           {staff.map((u) => (
