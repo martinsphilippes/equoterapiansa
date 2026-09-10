@@ -29,18 +29,20 @@ export function indexLinkOf(e: unknown): string | null {
  * da resposta). Uma tentativa por instância a cada 10 minutos; criar índice é
  * idempotente e não custa nada no plano gratuito.
  */
-let lastRepair = 0;
+let nextAttempt = 0;
 let repairing = false;
 function scheduleIndexRepair() {
   const now = Date.now();
-  if (repairing || now - lastRepair < 10 * 60_000) return;
+  if (repairing || now < nextAttempt) return;
   repairing = true;
-  lastRepair = now;
+  nextAttempt = now + 10 * 60_000;
   const run = async () => {
     try {
       const { createMissingIndexes } = await import("./index-admin");
       const r = await createMissingIndexes();
-      console.log("[firestore] autocriação de índices:", JSON.stringify(r));
+      // Sem permissão no Google Cloud não adianta insistir: espera muito mais.
+      if (r.permissionDenied) nextAttempt = Date.now() + 6 * 60 * 60_000;
+      console.log("[firestore] autocriação de índices:", JSON.stringify({ created: r.created, existing: r.existing, permissionDenied: r.permissionDenied, failed: r.failed.length }));
     } catch (e) {
       console.warn("[firestore] autocriação de índices falhou:", e instanceof Error ? e.message : e);
     } finally {

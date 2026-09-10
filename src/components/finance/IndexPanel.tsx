@@ -2,7 +2,7 @@ import { Badge, Card, Table, thCls, tdCls } from "@/components/ui";
 import { ActionForm } from "@/components/ui/ActionForm";
 import { SubmitButton } from "@/components/ui/FormStatus";
 import { ensureIndexes } from "@/lib/actions/finance-indexes";
-import { indexStatus, REQUIRED_INDEXES } from "@/lib/db/index-admin";
+import { indexStatus, serviceAccountEmail, REQUIRED_INDEXES } from "@/lib/db/index-admin";
 
 const LABEL: Record<string, { tone: "green" | "amber" | "red" | "gray"; text: string }> = {
   READY: { tone: "green", text: "Pronto" },
@@ -15,7 +15,10 @@ const LABEL: Record<string, { tone: "green" | "amber" | "red" | "gray"; text: st
 /** Conferência e criação dos índices compostos que as consultas exigem. */
 export async function IndexPanel() {
   const status = await indexStatus();
-  const consoleUrl = `https://console.firebase.google.com/project/${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? ""}/firestore/databases/-default-/indexes`;
+  const project = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "";
+  const consoleUrl = `https://console.firebase.google.com/project/${project}/firestore/databases/-default-/indexes`;
+  const iamUrl = `https://console.cloud.google.com/iam-admin/iam?project=${project}`;
+  const account = serviceAccountEmail();
   const missing = status.ok ? status.items.filter((i) => i.state !== "READY").length : 0;
   return (
     <div className="space-y-5">
@@ -29,6 +32,19 @@ export async function IndexPanel() {
             <ActionForm action={ensureIndexes}>
               <SubmitButton pendingText="Criando…">{missing === 0 ? "Conferir novamente" : "Criar índices que faltam"}</SubmitButton>
             </ActionForm>
+            {missing > 0 && (
+              <div className="rounded-xl bg-surface-50 border border-border p-3 text-sm space-y-2">
+                <p className="font-semibold">Se aparecer &ldquo;sem permissão&rdquo;</p>
+                <p className="text-ink-700">A conta de serviço do aplicativo precisa do papel <strong>Administrador de índices do Cloud Datastore</strong> para criar índices. É uma vez só: depois disso o sistema resolve sozinho sempre que faltar algum.</p>
+                <ol className="list-decimal pl-5 space-y-1 text-ink-700">
+                  <li>Abra o <a href={iamUrl} target="_blank" rel="noreferrer" className="text-primary-600 underline font-semibold">IAM do Google Cloud</a> deste projeto.</li>
+                  <li>Localize {account ? <code className="bg-surface-100 px-1 rounded break-all">{account}</code> : "a conta de serviço do Firebase Admin"} e clique no lápis para editar.</li>
+                  <li>Adicione o papel <code className="bg-surface-100 px-1 rounded">Cloud Datastore Index Admin</code> e salve.</li>
+                  <li>Volte aqui e clique em <strong>Criar índices que faltam</strong>.</li>
+                </ol>
+                <p className="text-ink-700">Alternativa pelo terminal, sem mexer em permissão: <code className="bg-surface-100 px-1 rounded">firebase deploy --only firestore:indexes</code></p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mt-3 space-y-2 text-sm">

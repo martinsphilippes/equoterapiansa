@@ -57,14 +57,25 @@ export async function indexStatus(): Promise<{ ok: true; items: IndexStatus[] } 
   }
 }
 
+/** E-mail da conta de serviço, para orientar a liberação de permissão no Google Cloud. */
+export function serviceAccountEmail(): string | null {
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+  if (!raw) return null;
+  try {
+    return (JSON.parse(Buffer.from(raw, "base64").toString("utf8")) as { client_email?: string }).client_email ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** Cria os índices que faltam. Idempotente: o que já existe é ignorado. */
-export async function createMissingIndexes(): Promise<{ created: number; existing: number; failed: { index: string; error: string }[] }> {
+export async function createMissingIndexes(): Promise<{ created: number; existing: number; failed: { index: string; error: string }[]; permissionDenied: boolean }> {
   const status = await indexStatus();
-  if (!status.ok) return { created: 0, existing: 0, failed: [{ index: "listagem", error: status.error }] };
+  if (!status.ok) return { created: 0, existing: 0, failed: [{ index: "listagem", error: status.error }], permissionDenied: status.error.includes("403") };
   const missing = status.items.filter((i) => i.state === "MISSING");
   const failed: { index: string; error: string }[] = [];
   let created = 0;
-  if (missing.length === 0) return { created: 0, existing: status.items.length, failed };
+  if (missing.length === 0) return { created: 0, existing: status.items.length, failed, permissionDenied: false };
   const bearer = `Bearer ${await token()}`;
   // Em paralelo: a criação é rápida e o conjunto é pequeno e conhecido.
   const results = await Promise.all(missing.map(async (i) => {
@@ -82,5 +93,5 @@ export async function createMissingIndexes(): Promise<{ created: number; existin
     if (r.ok) { if (r.counted) created++; }
     else failed.push({ index: r.index, error: r.error });
   }
-  return { created, existing: status.items.length - missing.length, failed };
+  return { created, existing: status.items.length - missing.length, failed, permissionDenied: failed.some((f) => f.error.startsWith("403")) };
 }
