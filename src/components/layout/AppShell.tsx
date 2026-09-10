@@ -5,6 +5,7 @@ import type { UserProfile } from "@/lib/db/types";
 import { hasAny, hasPermission } from "@/lib/auth/session";
 import { ROLE_LABELS } from "@/lib/auth/permissions";
 import { NavLinks, type NavItem } from "./NavLinks";
+import { MoreMenu } from "./MoreMenu";
 import { LogoutButton } from "./LogoutButton";
 import { Avatar } from "@/components/ui";
 import { BrandLogo, BrandLockup } from "@/components/brand/Brand";
@@ -23,10 +24,39 @@ export function buildNav(user: UserProfile): NavItem[] {
   items.push({ href: "/comunicados", label: "Comunicados", icon: "megaphone" });
   if (hasPermission(user, "audit.view")) items.push({ href: "/auditoria", label: "Auditoria", icon: "shield" });
   if (hasAny(user, ["settings.manage", "users.manage"])) items.push({ href: "/configuracoes", label: "Configurações", icon: "settings" });
+  for (const it of items) it.primary = primaryFor(user.role).includes(it.href);
   return items;
 }
 
+/**
+ * Telas fixas na barra do celular, por perfil. Quem administra vive no
+ * financeiro e na agenda; quem atende vive na agenda e na própria jornada.
+ */
+function primaryFor(role: UserProfile["role"]): string[] {
+  switch (role) {
+    case "owner":
+    case "manager":
+      return ["/painel", "/agenda", "/praticantes", "/financeiro"];
+    case "professional":
+      return ["/painel", "/agenda", "/praticantes", "/jornada"];
+    default:
+      return ["/painel", "/agenda", "/jornada", "/comunicados"];
+  }
+}
+
+/** Divide o menu entre a barra inferior do celular e a folha "Mais". */
+export function splitNav(nav: NavItem[]): { bar: NavItem[]; more: NavItem[] } {
+  if (nav.length <= 5) return { bar: nav, more: [] };
+  const bar = nav.filter((i) => i.primary).slice(0, 4);
+  for (const it of nav) {
+    if (bar.length >= 4) break;
+    if (!bar.includes(it)) bar.push(it);
+  }
+  return { bar, more: nav.filter((i) => !bar.includes(i)) };
+}
+
 export function AppShell({ user, children, nav, homeHref = "/painel" }: { user: UserProfile; children: ReactNode; nav: NavItem[]; homeHref?: string; orgName?: string }) {
+  const { bar, more } = splitNav(nav);
   return (
     <div className="flex-1 flex min-h-dvh">
       {/* Sidebar (desktop): logo completa, navegação e usuário */}
@@ -57,7 +87,7 @@ export function AppShell({ user, children, nav, homeHref = "/painel" }: { user: 
         </header>
         <main className="flex-1 px-4 py-5 md:px-8 md:py-7 pb-24 md:pb-8 max-w-6xl w-full mx-auto">{children}</main>
         <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 bg-surface border-t border-border no-print pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-16px_rgba(10,14,110,0.25)]">
-          <NavLinks items={nav.slice(0, 5)} orientation="horizontal" />
+          <NavLinks items={bar} orientation="horizontal" trailing={more.length > 0 ? <MoreMenu items={more} /> : undefined} />
         </nav>
       </div>
     </div>

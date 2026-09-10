@@ -93,6 +93,10 @@ e2e/                  testes de fumaça com Playwright contra os emuladores
 
 Financeiro: `financialCategories`, `costCenters`, `financialAccounts`, `paymentMethods`, `suppliers`, `financialEntries` (contas a receber/pagar, `kind`), `financialTransactions` (entradas, saídas e transferências), `recurrenceRules`, `billingPlans`, `financialSummaries/{AAAA-MM}` (resumos incrementais para painel e DRE) e `financialSettings/general`.
 
+## Navegação no celular
+
+A barra inferior comporta cinco alvos de toque confortáveis numa tela de 390 pontos. Quatro são fixos, escolhidos por perfil (quem administra recebe Painel, Agenda, Praticantes e Financeiro; quem atende recebe Jornada no lugar do Financeiro), e o quinto é **Mais**, que abre uma folha com o restante do menu, mais Minha conta e Sair. A folha respeita as permissões: ninguém vê ali o que não veria no menu. No computador a barra lateral continua mostrando tudo.
+
 ## Usuários e acessos
 
 Todo acesso está ligado a uma pessoa: a equipe a um colaborador (de onde vêm jornada, pagamentos e o escopo do profissional) e a família a um responsável. Em *Configurações → Usuários e permissões* o acesso pode ser criado de três formas: cadastrando a pessoa nova (o colaborador é criado junto), escolhendo um colaborador que ainda não tem acesso, ou escolhendo um responsável. A senha provisória aparece uma única vez, na tela, e é trocada no primeiro acesso.

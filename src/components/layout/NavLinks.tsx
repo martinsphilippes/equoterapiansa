@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import { Home, Calendar, Users, Clock, Briefcase, Wallet, CircleDollarSign, Megaphone, ShieldCheck, Settings, Heart, FileText, type LucideIcon } from "lucide-react";
 
 const icons: Record<string, LucideIcon> = {
@@ -8,14 +9,20 @@ const icons: Record<string, LucideIcon> = {
   megaphone: Megaphone, shield: ShieldCheck, settings: Settings, heart: Heart, file: FileText,
 };
 
-export interface NavItem { href: string; label: string; icon: keyof typeof icons | string }
+export interface NavItem {
+  href: string;
+  label: string;
+  icon: keyof typeof icons | string;
+  /** Fica fixo na barra inferior do celular; o resto vai para "Mais". */
+  primary?: boolean;
+}
 
-export function NavLinks({ items, orientation }: { items: NavItem[]; orientation: "vertical" | "horizontal" }) {
+export function NavLinks({ items, orientation, trailing }: { items: NavItem[]; orientation: "vertical" | "horizontal"; /** Célula extra ao fim da barra (usada pelo botão "Mais"). */ trailing?: ReactNode }) {
   const pathname = usePathname();
   const isActive = (href: string) => pathname === href || (href !== "/familia" && pathname.startsWith(href + "/")) || (href === "/familia" && pathname === "/familia");
   if (orientation === "horizontal") {
     return (
-      <ul className="grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
+      <ul className="grid" style={{ gridTemplateColumns: `repeat(${items.length + (trailing ? 1 : 0)}, minmax(0, 1fr))` }}>
         {items.map((it) => {
           const Icon = icons[it.icon] ?? Home;
           const active = isActive(it.href);
@@ -30,6 +37,7 @@ export function NavLinks({ items, orientation }: { items: NavItem[]; orientation
             </li>
           );
         })}
+        {trailing}
       </ul>
     );
   }
